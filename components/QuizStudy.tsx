@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import type { Card } from '@/lib/types'
 import { shuffleArray } from '@/lib/utils'
 import { selectDistractors } from '@/lib/quiz'
+import GenderBadge from '@/components/GenderBadge'
 
 interface Question {
   card: Card
@@ -101,7 +102,10 @@ export default function QuizStudy({ setId, cards }: Props) {
 
       <div className="bg-white border-2 border-qz-border rounded-2xl p-8 text-center" style={{ boxShadow: 'var(--qz-shadow-card)' }}>
         <p className="text-sm text-qz-secondary mb-3">What does this mean in English?</p>
-        <p className="text-3xl font-bold text-qz-text">{current.card.italian}</p>
+        <div className="flex items-center justify-center gap-2">
+          <p className="text-3xl font-bold text-qz-text">{current.card.italian}</p>
+          <GenderBadge gender={current.card.gender} />
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3">

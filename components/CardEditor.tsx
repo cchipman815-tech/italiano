@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import type { Card, ConjugationForms } from '@/lib/types'
 import SpeakButton from '@/components/SpeakButton'
+import GenderBadge from '@/components/GenderBadge'
 
 interface Props {
   card: Card
@@ -76,6 +77,7 @@ export default function CardEditor({ card, onSave, onDelete }: Props) {
           <>
             <span className="flex-1 font-medium text-qz-text flex items-center gap-1.5">
               {card.italian}
+              <GenderBadge gender={card.gender} size="sm" />
               <SpeakButton text={card.italian} size="sm" />
             </span>
             <span className="flex-1 text-qz-secondary">{card.english}</span>

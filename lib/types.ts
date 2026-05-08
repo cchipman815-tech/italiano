@@ -35,6 +35,9 @@ export interface Card {
   sort_order: number
   conjugations: Conjugations | null
   enabled: boolean
+  gender?: 'm' | 'f' | null
+  plural?: string | null
+  example?: { italian: string; english: string } | null
 }
 
 export interface Progress {

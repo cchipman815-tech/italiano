@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import type { Card } from '@/lib/types'
 import { shuffleArray } from '@/lib/utils'
 import SpeakButton from '@/components/SpeakButton'
+import GenderBadge from '@/components/GenderBadge'
 
 interface Props {
   setId: string
@@ -110,6 +111,7 @@ export default function FlashcardStudy({ setId, cards, initialProgress }: Props)
             <>
               <div className="flex items-center gap-2 justify-center">
                 <div className="text-3xl font-bold text-qz-text">{currentCard.italian}</div>
+                <GenderBadge gender={currentCard.gender} />
                 <SpeakButton text={currentCard.italian} />
               </div>
               <div className="text-sm text-qz-secondary">click or press space to flip</div>
@@ -118,6 +120,7 @@ export default function FlashcardStudy({ setId, cards, initialProgress }: Props)
             <>
               <div className="flex items-center gap-2 justify-center">
                 <div className="text-sm text-qz-secondary mb-1">{currentCard.italian}</div>
+                <GenderBadge gender={currentCard.gender} size="sm" />
                 <SpeakButton text={currentCard.italian} size="sm" />
               </div>
               <div className="text-3xl font-bold text-qz-text">{currentCard.english}</div>
