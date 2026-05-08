@@ -108,6 +108,28 @@ export default async function SetDetailPage({
           </div>
         )}
 
+        {canStudyMulti ? (
+          <Link
+            href={`/sets/${id}/listening`}
+            className="flex items-center gap-4 bg-white border-2 border-qz-border rounded-2xl p-5 hover:border-qz-blue transition-colors"
+            style={{ boxShadow: 'var(--qz-shadow-sm)' }}
+          >
+            <span className="text-3xl">🎧</span>
+            <div>
+              <div className="font-semibold text-qz-text">Listening</div>
+              <div className="text-sm text-qz-secondary">Hear Italian, pick the meaning</div>
+            </div>
+          </Link>
+        ) : (
+          <div className="flex items-center gap-4 bg-qz-subtle border-2 border-qz-border rounded-2xl p-5 opacity-50 cursor-not-allowed">
+            <span className="text-3xl">🎧</span>
+            <div>
+              <div className="font-semibold text-qz-secondary">Listening</div>
+              <div className="text-sm text-qz-secondary">Need at least 4 cards to enable</div>
+            </div>
+          </div>
+        )}
+
         <Link
           href={`/sets/${id}/edit`}
           className="text-center py-3 text-sm font-medium text-qz-secondary border-2 border-qz-border rounded-2xl hover:border-qz-blue hover:text-qz-blue transition-colors"
