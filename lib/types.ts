@@ -45,6 +45,10 @@ export interface Progress {
   card_id: string
   known: boolean
   last_seen_at: string
+  interval: number
+  ease_factor: number
+  repetitions: number
+  next_review_at: string | null
 }
 
 export interface SetWithProgress extends Set {

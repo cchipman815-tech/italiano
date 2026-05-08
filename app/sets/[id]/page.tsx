@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { redirect, notFound } from 'next/navigation'
 import { isValidUserId } from '@/lib/users'
 import { calculateProgress } from '@/lib/utils'
+import { isDueToday } from '@/lib/srs'
 import type { SetWithCards } from '@/lib/types'
 
 async function getSet(id: string, userId: number) {
@@ -32,6 +33,14 @@ export default async function SetDetailPage({
   const knownCards = set.progress.filter(p => p.known).length
   const progress = calculateProgress(knownCards, totalCards)
   const canStudyMulti = totalCards >= 4
+
+  // SRS: count cards due today
+  const progressMap = Object.fromEntries(set.progress.map(p => [p.card_id, p]))
+  const dueCount = set.cards.filter(card => {
+    if (card.enabled === false) return false
+    const p = progressMap[card.id]
+    return isDueToday(p?.next_review_at ?? null)
+  }).length
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
@@ -129,6 +138,23 @@ export default async function SetDetailPage({
             </div>
           </div>
         )}
+
+        <Link
+          href={`/sets/${id}/review`}
+          className="flex items-center gap-4 bg-white border-2 border-qz-blue rounded-2xl p-5 hover:bg-qz-blue-light transition-colors"
+          style={{ boxShadow: 'var(--qz-shadow-sm)' }}
+        >
+          <span className="text-3xl">🔁</span>
+          <div className="flex-1">
+            <div className="font-semibold text-qz-blue">Review Due Cards</div>
+            <div className="text-sm text-qz-secondary">Spaced repetition — study what matters</div>
+          </div>
+          {dueCount > 0 && (
+            <span className="bg-qz-blue text-white text-xs font-bold px-2.5 py-1 rounded-full">
+              {dueCount} due
+            </span>
+          )}
+        </Link>
 
         <Link
           href={`/sets/${id}/edit`}

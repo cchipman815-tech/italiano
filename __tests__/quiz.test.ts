@@ -8,6 +8,8 @@ const makeCard = (id: string, english: string): Card => ({
   italian: `italian-${id}`,
   english,
   sort_order: 0,
+  conjugations: null,
+  enabled: true,
 })
 
 const cards: Card[] = [
