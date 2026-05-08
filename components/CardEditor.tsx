@@ -18,6 +18,7 @@ export default function CardEditor({ card, onSave, onDelete }: Props) {
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
   const [showConjugations, setShowConjugations] = useState(false)
+  const [expanded, setExpanded] = useState(false)
   const [generatingPlural, setGeneratingPlural] = useState(false)
   const [generatingExample, setGeneratingExample] = useState(false)
 
@@ -92,8 +93,7 @@ export default function CardEditor({ card, onSave, onDelete }: Props) {
     await onDelete(card.id)
   }
 
-  const hasConjugations = card.conjugations?.present &&
-    Object.values(card.conjugations.present).some(v => v.trim())
+  const metadataCount = (card.plural ? 1 : 0) + (card.example ? 1 : 0)
 
   return (
     <div className={`border-b border-qz-border py-2.5 ${!card.enabled ? 'opacity-50' : ''}`}>
@@ -101,6 +101,7 @@ export default function CardEditor({ card, onSave, onDelete }: Props) {
       <div className="flex items-center gap-3 group">
         {/* Toggle */}
         <button
+          type="button"
           onClick={handleToggleEnabled}
           disabled={saving}
           title={card.enabled ? 'Disable card' : 'Enable card'}
@@ -115,73 +116,152 @@ export default function CardEditor({ card, onSave, onDelete }: Props) {
 
         {!editing ? (
           <>
-            <span className="flex-1 font-medium text-qz-text flex items-center gap-1.5">
+            {/* Italian word */}
+            <span className="flex-1 font-medium text-qz-text flex items-center gap-1.5 min-w-0">
               {card.italian}
               <GenderBadge gender={card.gender} size="sm" />
               <SpeakButton text={card.italian} size="sm" />
             </span>
-            <span className="flex-1 text-qz-secondary">{card.english}</span>
-            {hasConjugations && (
-              <span className="text-xs text-qz-blue bg-qz-blue-light px-1.5 py-0.5 rounded-full font-medium">conjugated</span>
-            )}
-            {card.plural && (
-              <span className="text-xs text-qz-secondary">pl. <span className="font-medium text-qz-text">{card.plural}</span></span>
-            )}
-            {card.gender && !card.plural && !card.conjugations && (
+
+            {/* English */}
+            <span className="flex-1 text-qz-secondary min-w-0">{card.english}</span>
+
+            {/* Expand button */}
+            {metadataCount > 0 ? (
               <button
-                onClick={handleGeneratePlural}
-                disabled={generatingPlural}
-                className="text-xs text-qz-secondary hover:text-qz-text disabled:opacity-50 cursor-pointer transition-colors"
+                type="button"
+                aria-label={`${metadataCount} detail${metadataCount !== 1 ? 's' : ''}, ${expanded ? 'collapse' : 'expand'}`}
+                aria-expanded={expanded}
+                onClick={() => {
+                  setExpanded(v => {
+                    if (v) setShowConjugations(false) // close conjugation editor when collapsing
+                    return !v
+                  })
+                }}
+                className="flex-shrink-0 flex items-center gap-1 text-xs font-semibold text-qz-blue bg-qz-blue-light px-2 py-0.5 rounded-full hover:bg-blue-100 transition-colors cursor-pointer"
               >
-                {generatingPlural ? 'generating…' : '+ plural'}
+                {metadataCount} {expanded ? '▾' : '▸'}
               </button>
-            )}
-            {card.example ? (
-              <span className="text-xs text-green-600 font-medium">example ✓</span>
-            ) : !card.conjugations && (
+            ) : (
               <button
-                onClick={handleGenerateExample}
-                disabled={generatingExample}
-                className="text-xs text-qz-secondary hover:text-qz-text disabled:opacity-50 cursor-pointer transition-colors"
+                type="button"
+                aria-label="More options"
+                onClick={() => {
+                  setExpanded(v => {
+                    if (v) setShowConjugations(false) // close conjugation editor when collapsing
+                    return !v
+                  })
+                }}
+                className="flex-shrink-0 text-xs text-qz-secondary opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity cursor-pointer hover:text-qz-text"
               >
-                {generatingExample ? 'generating…' : '+ example'}
+                ⋯
               </button>
             )}
-            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button onClick={() => setEditing(true)} className="text-xs text-qz-blue hover:text-qz-blue-dark font-medium cursor-pointer transition-colors">
-                Edit
-              </button>
-              <button onClick={() => setShowConjugations(v => !v)} className="text-xs text-purple-600 hover:text-purple-800 font-medium cursor-pointer transition-colors">
-                Conjugate
-              </button>
-              <button onClick={handleDelete} className="text-xs text-red-600 hover:text-red-800 font-medium cursor-pointer transition-colors">
-                Delete
-              </button>
-            </div>
           </>
         ) : (
           <>
-            <input
-              value={italian}
-              onChange={e => setItalian(e.target.value)}
-              className="flex-1 border-2 border-qz-border rounded-lg px-2 py-1 text-sm text-qz-text placeholder:text-qz-secondary focus:outline-none focus:border-qz-blue transition-colors"
-              placeholder="Italian"
-            />
-            <input
-              value={english}
-              onChange={e => setEnglish(e.target.value)}
-              className="flex-1 border-2 border-qz-border rounded-lg px-2 py-1 text-sm text-qz-text placeholder:text-qz-secondary focus:outline-none focus:border-qz-blue transition-colors"
-              placeholder="English"
-            />
-            <button onClick={handleSaveText} disabled={saving} className="text-xs text-qz-blue font-semibold hover:text-qz-blue-dark disabled:opacity-50 cursor-pointer transition-colors">
+            <div className="flex-1 flex flex-col sm:flex-row gap-2">
+              <input
+                value={italian}
+                onChange={e => setItalian(e.target.value)}
+                className="flex-1 border-2 border-qz-border rounded-lg px-2 py-1 text-sm text-qz-text placeholder:text-qz-secondary focus:outline-none focus:border-qz-blue transition-colors"
+                placeholder="Italian"
+              />
+              <input
+                value={english}
+                onChange={e => setEnglish(e.target.value)}
+                className="flex-1 border-2 border-qz-border rounded-lg px-2 py-1 text-sm text-qz-text placeholder:text-qz-secondary focus:outline-none focus:border-qz-blue transition-colors"
+                placeholder="English"
+              />
+            </div>
+            <button type="button" onClick={handleSaveText} disabled={saving} className="text-xs text-qz-blue font-semibold hover:text-qz-blue-dark disabled:opacity-50 cursor-pointer transition-colors flex-shrink-0">
               Save
             </button>
-            <button onClick={() => { setItalian(card.italian); setEnglish(card.english); setEditing(false) }} className="text-xs text-qz-secondary hover:text-qz-text cursor-pointer transition-colors">
+            <button type="button" onClick={() => { setItalian(card.italian); setEnglish(card.english); setEditing(false) }} className="text-xs text-qz-secondary hover:text-qz-text cursor-pointer transition-colors flex-shrink-0">
               Cancel
             </button>
           </>
         )}
       </div>
+
+      {/* Expanded detail panel */}
+      {expanded && !editing && (
+        <div className="mt-2 ml-12 bg-qz-subtle border border-qz-border rounded-xl p-3">
+          {/* Plural row */}
+          {(card.plural || (card.gender && !card.conjugations)) && (
+            <div className="flex items-center gap-3 mb-2">
+              {card.plural && (
+                <span className="text-xs text-qz-secondary">
+                  pl. <span className="font-medium text-qz-text">{card.plural}</span>
+                </span>
+              )}
+              {card.gender && !card.plural && !card.conjugations && (
+                <button
+                  type="button"
+                  onClick={handleGeneratePlural}
+                  disabled={generatingPlural}
+                  className="text-xs text-qz-secondary hover:text-qz-text disabled:opacity-50 cursor-pointer transition-colors"
+                >
+                  {generatingPlural ? 'generating…' : '+ plural'}
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Example row */}
+          {!card.conjugations && (
+            <div className="flex items-center gap-3 mb-2">
+              {card.example ? (
+                <span className="text-xs text-green-600 font-medium">example ✓</span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleGenerateExample}
+                  disabled={generatingExample}
+                  className="text-xs text-qz-secondary hover:text-qz-text disabled:opacity-50 cursor-pointer transition-colors"
+                >
+                  {generatingExample ? 'generating…' : '+ example'}
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Example sentence text */}
+          {card.example && (
+            <div className="text-xs text-qz-secondary italic border-l-2 border-qz-border pl-2 py-0.5 mb-3">
+              <span className="not-italic font-medium text-qz-muted">ex. </span>
+              {card.example.italian}
+              <span className="not-italic text-qz-muted mx-1">·</span>
+              {card.example.english}
+            </div>
+          )}
+
+          {/* Divider + actions */}
+          <div className="border-t border-qz-border pt-2 flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => { setExpanded(false); setEditing(true) }}
+              className="text-xs text-qz-blue hover:text-qz-blue-dark font-medium cursor-pointer transition-colors"
+            >
+              Edit
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowConjugations(v => !v)}
+              className="text-xs text-purple-600 hover:text-purple-800 font-medium cursor-pointer transition-colors"
+            >
+              Conjugate
+            </button>
+            <button
+              type="button"
+              onClick={handleDelete}
+              className="text-xs text-red-600 hover:text-red-800 font-medium cursor-pointer transition-colors ml-auto"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Conjugation editor */}
       {showConjugations && (
@@ -204,26 +284,17 @@ export default function CardEditor({ card, onSave, onDelete }: Props) {
           </div>
           <div className="flex gap-2 mt-3">
             <button
+              type="button"
               onClick={handleSaveConjugations}
               disabled={saving}
               className="text-xs bg-qz-blue text-white px-4 py-1.5 rounded-full hover:bg-qz-blue-dark disabled:opacity-50 cursor-pointer font-semibold transition-colors"
             >
               {saving ? 'Saving…' : 'Save Conjugations'}
             </button>
-            <button onClick={() => setShowConjugations(false)} className="text-xs text-qz-secondary hover:text-qz-text cursor-pointer transition-colors">
+            <button type="button" onClick={() => setShowConjugations(false)} className="text-xs text-qz-secondary hover:text-qz-text cursor-pointer transition-colors">
               Cancel
             </button>
           </div>
-        </div>
-      )}
-
-      {/* Example sentence display */}
-      {card.example && (
-        <div className="mt-1.5 ml-12 text-xs text-qz-secondary italic border-l-2 border-qz-border pl-3 py-0.5">
-          <span className="not-italic font-medium text-qz-muted">ex. </span>
-          {card.example.italian}
-          <span className="not-italic text-qz-muted mx-1">·</span>
-          {card.example.english}
         </div>
       )}
     </div>
