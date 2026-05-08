@@ -1,0 +1,18 @@
+{
+  "planPath": "docs/superpowers/plans/2026-05-08-example-backfill-card-editor-redesign.md",
+  "tasks": [
+    {
+      "id": 0,
+      "subject": "Task 1: Backfill example sentences for all eligible cards",
+      "status": "pending",
+      "description": "**Goal:** Create scripts/backfill-examples.ts that generates and saves example sentences for every card that has no example and no conjugations.\n\n**Files:**\n- Create: `scripts/backfill-examples.ts`\n\n**Acceptance Criteria:**\n- [ ] Script queries all cards where example IS NULL\n- [ ] Cards with conjugations are skipped\n- [ ] Each remaining card gets an English template sentence translated EN→IT\n- [ ] Result saved to cards.example as { italian, english }\n- [ ] 100ms sleep between API calls\n- [ ] Final summary: ✓ N generated, N failed, N skipped\n- [ ] Idempotent — safe to run again\n\n**Verify:** `npx tsx scripts/backfill-examples.ts` → prints per-card results and summary\n\n```json:metadata\n{\"files\": [\"scripts/backfill-examples.ts\"], \"verifyCommand\": \"npx tsx scripts/backfill-examples.ts\", \"acceptanceCriteria\": [\"Script queries all cards where example IS NULL\", \"Cards with conjugations are skipped\", \"Results saved to cards.example\", \"Idempotent\"]}\n```"
+    },
+    {
+      "id": 1,
+      "subject": "Task 2: Redesign CardEditor with expand/collapse panel",
+      "status": "pending",
+      "description": "**Goal:** Rewrite components/CardEditor.tsx so the main row shows only toggle + italian + english + expand button, with Edit/Conjugate/Delete moved inside an expandable detail panel. Fix mobile edit overflow.\n\n**Files:**\n- Modify: `components/CardEditor.tsx`\n\n**Acceptance Criteria:**\n- [ ] Main row contains only: toggle, Italian (+ gender badge + speak btn), English, expand button\n- [ ] Cards with metadata show blue pill with count, always visible\n- [ ] Cards without metadata show muted ⋯ (hover-only desktop, always mobile)\n- [ ] Expanded panel shows plural, example, and Edit/Conjugate/Delete\n- [ ] Clicking Edit sets editing=true and expanded=false\n- [ ] Edit mode inputs stack vertically on mobile (flex-col sm:flex-row)\n- [ ] Toggle still works directly without opening panel\n- [ ] Conjugation editor still works\n\n**Verify:** Load edit page on desktop and 375px mobile viewport. Verify clean main row, working panel, no overflow on mobile.\n\n```json:metadata\n{\"files\": [\"components/CardEditor.tsx\"], \"verifyCommand\": \"open http://localhost:3000/sets/<any-id>/edit\", \"acceptanceCriteria\": [\"Main row is clean\", \"Expand button toggles panel\", \"Edit/Delete in panel\", \"No mobile overflow\"]}\n```"
+    }
+  ],
+  "lastUpdated": "2026-05-08T00:00:00.000Z"
+}
