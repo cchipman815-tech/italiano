@@ -137,6 +137,16 @@ export default function FlashcardStudy({ setId, cards, initialProgress }: Props)
                   )}
                 </div>
               )}
+              {currentCard.example && (
+                <div className="mt-3 border-t border-qz-border pt-3 w-full max-w-sm text-left">
+                  <p className="text-xs text-qz-muted uppercase tracking-wide font-semibold mb-1">Example</p>
+                  <div className="flex items-start gap-1">
+                    <p className="text-sm text-qz-text italic flex-1">{currentCard.example.italian}</p>
+                    <SpeakButton text={currentCard.example.italian} size="sm" />
+                  </div>
+                  <p className="text-xs text-qz-secondary mt-0.5">{currentCard.example.english}</p>
+                </div>
+              )}
               {currentCard.conjugations?.present && (
                 <div className="mt-4 grid grid-cols-3 gap-x-6 gap-y-1 text-sm text-qz-secondary border-t border-qz-border pt-4 w-full max-w-xs">
                   {(['io', 'tu', 'lui/lei', 'noi', 'voi', 'loro'] as const).map(pronoun => (

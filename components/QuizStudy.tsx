@@ -5,6 +5,7 @@ import type { Card } from '@/lib/types'
 import { shuffleArray } from '@/lib/utils'
 import { selectDistractors } from '@/lib/quiz'
 import GenderBadge from '@/components/GenderBadge'
+import SpeakButton from '@/components/SpeakButton'
 
 interface Question {
   card: Card
@@ -127,6 +128,17 @@ export default function QuizStudy({ setId, cards }: Props) {
           )
         })}
       </div>
+
+      {selected !== null && current.card.example && (
+        <div className="bg-qz-subtle border border-qz-border rounded-xl p-4">
+          <p className="text-xs text-qz-muted uppercase tracking-wide font-semibold mb-1.5">Example</p>
+          <div className="flex items-start gap-1">
+            <p className="text-sm text-qz-text italic flex-1">{current.card.example.italian}</p>
+            <SpeakButton text={current.card.example.italian} size="sm" />
+          </div>
+          <p className="text-xs text-qz-secondary mt-1">{current.card.example.english}</p>
+        </div>
+      )}
     </div>
   )
 }

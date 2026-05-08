@@ -6,7 +6,7 @@ import GenderBadge from '@/components/GenderBadge'
 
 interface Props {
   card: Card
-  onSave: (id: string, fields: Partial<Pick<Card, 'italian' | 'english' | 'conjugations' | 'enabled' | 'plural'>>) => Promise<void>
+  onSave: (id: string, fields: Partial<Pick<Card, 'italian' | 'english' | 'conjugations' | 'enabled' | 'plural' | 'example'>>) => Promise<void>
   onDelete: (id: string) => Promise<void>
 }
 
@@ -19,6 +19,7 @@ export default function CardEditor({ card, onSave, onDelete }: Props) {
   const [saving, setSaving] = useState(false)
   const [showConjugations, setShowConjugations] = useState(false)
   const [generatingPlural, setGeneratingPlural] = useState(false)
+  const [generatingExample, setGeneratingExample] = useState(false)
 
   const presentForms = card.conjugations?.present ?? null
   const [conjugations, setConjugations] = useState<ConjugationForms>(
@@ -64,6 +65,25 @@ export default function CardEditor({ card, onSave, onDelete }: Props) {
       console.error('Failed to generate plural:', err)
     } finally {
       setGeneratingPlural(false)
+    }
+  }
+
+  async function handleGenerateExample() {
+    setGeneratingExample(true)
+    try {
+      const res = await fetch('/api/example', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cardId: card.id, italian: card.italian, english: card.english }),
+      })
+      const data = await res.json()
+      if (data.example) {
+        await onSave(card.id, { example: data.example })
+      }
+    } catch (err) {
+      console.error('Failed to generate example:', err)
+    } finally {
+      setGeneratingExample(false)
     }
   }
 
@@ -114,6 +134,17 @@ export default function CardEditor({ card, onSave, onDelete }: Props) {
                 className="text-xs text-qz-secondary hover:text-qz-text disabled:opacity-50 cursor-pointer transition-colors"
               >
                 {generatingPlural ? 'generating…' : '+ plural'}
+              </button>
+            )}
+            {card.example ? (
+              <span className="text-xs text-green-600 font-medium">example ✓</span>
+            ) : !card.conjugations && (
+              <button
+                onClick={handleGenerateExample}
+                disabled={generatingExample}
+                className="text-xs text-qz-secondary hover:text-qz-text disabled:opacity-50 cursor-pointer transition-colors"
+              >
+                {generatingExample ? 'generating…' : '+ example'}
               </button>
             )}
             <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -183,6 +214,16 @@ export default function CardEditor({ card, onSave, onDelete }: Props) {
               Cancel
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Example sentence display */}
+      {card.example && (
+        <div className="mt-1.5 ml-12 text-xs text-qz-secondary italic border-l-2 border-qz-border pl-3 py-0.5">
+          <span className="not-italic font-medium text-qz-muted">ex. </span>
+          {card.example.italian}
+          <span className="not-italic text-qz-muted mx-1">·</span>
+          {card.example.english}
         </div>
       )}
     </div>
