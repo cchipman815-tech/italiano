@@ -35,9 +35,10 @@ const ROUND_SIZE = 4
 
 export default function MatchStudy({ setId, cards }: Props) {
   const router = useRouter()
+  const enabledCards = cards.filter(c => c.enabled !== false)
 
   const [rounds] = useState(() => {
-    const shuffled = shuffleArray(cards)
+    const shuffled = shuffleArray(enabledCards)
     const chunks: Card[][] = []
     for (let i = 0; i < shuffled.length; i += ROUND_SIZE) {
       chunks.push(shuffled.slice(i, i + ROUND_SIZE))
@@ -105,8 +106,8 @@ export default function MatchStudy({ setId, cards }: Props) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 text-center">
         <div className="text-5xl">🎯</div>
-        <h2 className="text-2xl font-bold text-gray-900">All Matched!</h2>
-        <p className="text-gray-500">Completed in {formatTime(elapsed)}</p>
+        <h2 className="text-2xl font-bold text-qz-text">All Matched!</h2>
+        <p className="text-qz-secondary">Completed in {formatTime(elapsed)}</p>
         <div className="flex gap-3">
           <button
             onClick={() => {
@@ -116,13 +117,13 @@ export default function MatchStudy({ setId, cards }: Props) {
               setElapsed(0)
               setDone(false)
             }}
-            className="px-5 py-2.5 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 cursor-pointer"
+            className="px-6 py-2.5 bg-qz-blue text-white rounded-full font-semibold hover:bg-qz-blue-dark cursor-pointer transition-colors"
           >
             Play Again
           </button>
           <button
             onClick={() => router.push(`/sets/${setId}`)}
-            className="px-5 py-2.5 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 cursor-pointer"
+            className="px-6 py-2.5 border-2 border-qz-border rounded-full text-qz-secondary font-medium hover:border-qz-blue hover:text-qz-blue cursor-pointer transition-colors"
           >
             Back to Set
           </button>
@@ -131,65 +132,36 @@ export default function MatchStudy({ setId, cards }: Props) {
     )
   }
 
-  const italianTiles = tiles.filter(t => t.side === 'italian')
-  const englishTiles = tiles.filter(t => t.side === 'english')
-
   return (
-    <div className="flex flex-col gap-6 py-6 max-w-xl mx-auto">
-      <div className="flex items-center justify-between text-sm text-gray-500">
+    <div className="flex flex-col gap-5 py-6 max-w-3xl mx-auto">
+      <div className="flex items-center justify-between text-sm text-qz-secondary">
         <span>Round {roundIndex + 1} of {rounds.length} · {matched.size}/{rounds[roundIndex].length} matched</span>
-        <span className="font-mono">{formatTime(elapsed)}</span>
+        <span className="font-mono font-semibold text-qz-text">{formatTime(elapsed)}</span>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        <div className="flex flex-col gap-3">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide text-center">Italian</p>
-          {italianTiles.map(tile => {
-            const isMatched = matched.has(tile.cardId)
-            const isSelected = selected?.id === tile.id
-            const isShaking = shaking.has(tile.id)
-            return (
-              <button
-                key={tile.id}
-                onClick={() => handleTileClick(tile)}
-                disabled={isMatched}
-                className={[
-                  'p-4 rounded-xl border text-center font-medium transition-all',
-                  isMatched && 'bg-green-100 border-green-200 text-green-700 opacity-50 line-through',
-                  isSelected && 'bg-green-600 border-green-600 text-white',
-                  !isMatched && !isSelected && 'bg-white border-gray-200 hover:border-green-400 cursor-pointer',
-                  isShaking && 'animate-bounce',
-                ].filter(Boolean).join(' ')}
-              >
-                {tile.text}
-              </button>
-            )
-          })}
-        </div>
-        <div className="flex flex-col gap-3">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide text-center">English</p>
-          {englishTiles.map(tile => {
-            const isMatched = matched.has(tile.cardId)
-            const isSelected = selected?.id === tile.id
-            const isShaking = shaking.has(tile.id)
-            return (
-              <button
-                key={tile.id}
-                onClick={() => handleTileClick(tile)}
-                disabled={isMatched}
-                className={[
-                  'p-4 rounded-xl border text-center font-medium transition-all',
-                  isMatched && 'bg-green-100 border-green-200 text-green-700 opacity-50 line-through',
-                  isSelected && 'bg-blue-600 border-blue-600 text-white',
-                  !isMatched && !isSelected && 'bg-white border-gray-200 hover:border-blue-400 cursor-pointer',
-                  isShaking && 'animate-bounce',
-                ].filter(Boolean).join(' ')}
-              >
-                {tile.text}
-              </button>
-            )
-          })}
-        </div>
+      <div className="grid grid-cols-4 gap-3">
+        {tiles.map(tile => {
+          const isMatched = matched.has(tile.cardId)
+          const isSelected = selected?.id === tile.id
+          const isShaking = shaking.has(tile.id)
+          return (
+            <button
+              key={tile.id}
+              onClick={() => handleTileClick(tile)}
+              disabled={isMatched}
+              className={[
+                'p-4 rounded-2xl border-2 text-center font-semibold text-qz-text transition-all min-h-[100px] flex items-center justify-center',
+                isMatched && 'bg-qz-blue-light border-qz-blue text-qz-blue opacity-50 line-through',
+                isSelected && 'bg-qz-blue border-qz-blue text-white scale-95',
+                !isMatched && !isSelected && 'bg-white border-qz-border hover:border-qz-blue cursor-pointer',
+                isShaking && 'animate-bounce border-red-400',
+              ].filter(Boolean).join(' ')}
+              style={!isMatched && !isSelected ? { boxShadow: 'var(--qz-shadow-card)' } : undefined}
+            >
+              {tile.text}
+            </button>
+          )
+        })}
       </div>
     </div>
   )

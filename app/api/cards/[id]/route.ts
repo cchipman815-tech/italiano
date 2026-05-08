@@ -11,12 +11,18 @@ export async function PUT(
 
   const { id } = await params
   const body = await request.json()
-  const { italian, english } = body
+  const { italian, english, conjugations, enabled } = body
+
+  const update: Record<string, unknown> = {}
+  if (italian !== undefined) update.italian = italian
+  if (english !== undefined) update.english = english
+  if (conjugations !== undefined) update.conjugations = conjugations
+  if (enabled !== undefined) update.enabled = enabled
 
   const db = createServerClient()
   const { data, error } = await db
     .from('cards')
-    .update({ italian, english })
+    .update(update)
     .eq('id', id)
     .select()
     .single()

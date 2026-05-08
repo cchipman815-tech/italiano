@@ -9,18 +9,18 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center gap-8 bg-white">
+    <main className="min-h-screen flex flex-col items-center justify-center gap-8 bg-qz-bg">
       <div className="text-center">
         <div className="text-6xl mb-4">🇮🇹</div>
-        <h1 className="text-3xl font-bold text-gray-900">Italiano</h1>
-        <p className="text-gray-500 mt-2">Chi sei? / Who are you?</p>
+        <h1 className="text-3xl font-bold text-qz-text">Italiano</h1>
+        <p className="text-qz-secondary mt-2">Chi sei? / Who are you?</p>
       </div>
       <div className="flex gap-4">
         {USERS.map(user => (
           <button
             key={user.id}
             onClick={() => selectUser(user.id)}
-            className="px-8 py-4 text-xl font-semibold bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors cursor-pointer"
+            className="px-8 py-3.5 text-lg font-semibold bg-qz-blue text-white rounded-full hover:bg-qz-blue-dark transition-colors cursor-pointer shadow-[0px_4px_16px_0px_rgba(66,85,255,0.30)]"
           >
             {user.name}
           </button>

@@ -9,7 +9,9 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "seed": "npx tsx scripts/seed.ts"
+    "seed": "npx tsx scripts/seed.ts",
+    "seed:conjugations": "npx tsx scripts/seed-conjugations.ts",
+    "migrate:conjugation-cards": "npx tsx scripts/migrate-conjugation-cards.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.105.1",

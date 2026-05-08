@@ -35,8 +35,9 @@ interface Props {
 
 export default function QuizStudy({ setId, cards }: Props) {
   const router = useRouter()
-  const questionCount = Math.min(cards.length, 20)
-  const [questions] = useState(() => buildQuestions(cards, questionCount))
+  const enabledCards = cards.filter(c => c.enabled !== false)
+  const questionCount = Math.min(enabledCards.length, 20)
+  const [questions] = useState(() => buildQuestions(enabledCards, questionCount))
   const [index, setIndex] = useState(0)
   const [selected, setSelected] = useState<number | null>(null)
   const [score, setScore] = useState(0)
@@ -64,19 +65,19 @@ export default function QuizStudy({ setId, cards }: Props) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 text-center">
         <div className="text-5xl">📝</div>
-        <h2 className="text-2xl font-bold text-gray-900">Quiz Complete!</h2>
-        <div className="text-3xl font-bold text-green-600">{score} / {questions.length}</div>
-        <p className="text-gray-500">{Math.round((score / questions.length) * 100)}% correct</p>
+        <h2 className="text-2xl font-bold text-qz-text">Quiz Complete!</h2>
+        <div className="text-3xl font-bold text-qz-blue">{score} / {questions.length}</div>
+        <p className="text-qz-secondary">{Math.round((score / questions.length) * 100)}% correct</p>
         <div className="flex gap-3">
           <button
             onClick={() => { setIndex(0); setScore(0); setSelected(null); setDone(false) }}
-            className="px-5 py-2.5 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 cursor-pointer"
+            className="px-6 py-2.5 bg-qz-blue text-white rounded-full font-semibold hover:bg-qz-blue-dark cursor-pointer transition-colors"
           >
             Retake Quiz
           </button>
           <button
             onClick={() => router.push(`/sets/${setId}`)}
-            className="px-5 py-2.5 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 cursor-pointer"
+            className="px-6 py-2.5 border-2 border-qz-border rounded-full text-qz-secondary font-medium hover:border-qz-blue hover:text-qz-blue cursor-pointer transition-colors"
           >
             Back to Set
           </button>
@@ -87,33 +88,33 @@ export default function QuizStudy({ setId, cards }: Props) {
 
   return (
     <div className="flex flex-col gap-6 py-6 max-w-xl mx-auto">
-      <div className="flex items-center justify-between text-sm text-gray-500">
+      <div className="flex items-center justify-between text-sm text-qz-secondary">
         <span>Question {index + 1} of {questions.length}</span>
-        <span className="text-green-600 font-medium">Score: {score}/{index}</span>
+        <span className="text-qz-blue font-semibold">Score: {score}/{index}</span>
       </div>
-      <div className="w-full bg-gray-100 rounded-full h-1.5">
+      <div className="w-full bg-qz-subtle rounded-full h-1.5">
         <div
-          className="bg-green-500 h-1.5 rounded-full transition-all"
+          className="bg-qz-blue h-1.5 rounded-full transition-all"
           style={{ width: `${(index / questions.length) * 100}%` }}
         />
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-xl p-6 text-center">
-        <p className="text-sm text-gray-400 mb-2">What does this mean in English?</p>
-        <p className="text-3xl font-bold text-gray-900">{current.card.italian}</p>
+      <div className="bg-white border-2 border-qz-border rounded-2xl p-8 text-center" style={{ boxShadow: 'var(--qz-shadow-card)' }}>
+        <p className="text-sm text-qz-secondary mb-3">What does this mean in English?</p>
+        <p className="text-3xl font-bold text-qz-text">{current.card.italian}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         {current.options.map((option, i) => {
-          let cls = 'p-4 rounded-xl border text-center font-medium transition-colors '
+          let cls = 'p-5 rounded-2xl border-2 text-center font-semibold text-qz-text transition-all '
           if (selected === null) {
-            cls += 'bg-white border-gray-200 hover:border-green-400 hover:bg-green-50 cursor-pointer'
+            cls += 'bg-white border-qz-border hover:border-qz-blue hover:bg-qz-blue-light cursor-pointer'
           } else if (i === current.correctIndex) {
-            cls += 'bg-green-500 border-green-500 text-white'
+            cls += 'bg-qz-blue border-qz-blue text-white'
           } else if (i === selected) {
-            cls += 'bg-red-500 border-red-500 text-white'
+            cls += 'bg-red-600 border-red-600 text-white'
           } else {
-            cls += 'bg-white border-gray-200 opacity-50'
+            cls += 'bg-white border-qz-border opacity-40'
           }
           return (
             <button key={option.id} onClick={() => handleSelect(i)} className={cls}>

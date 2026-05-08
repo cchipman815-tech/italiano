@@ -26,13 +26,14 @@ export default async function HomePage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <header className="flex items-center justify-between mb-8">
+      <header className="flex items-center justify-between mb-8 bg-white rounded-2xl px-6 py-4 border-2 border-qz-border"
+        style={{ boxShadow: 'var(--qz-shadow-sm)' }}>
         <div className="flex items-center gap-3">
           <span className="text-3xl">🇮🇹</span>
-          <h1 className="text-2xl font-bold text-gray-900">Italiano</h1>
+          <h1 className="text-xl font-bold text-qz-text">Italiano</h1>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-gray-600 font-medium">{user.name}</span>
+          <span className="text-qz-secondary font-medium">{user.name}</span>
           <SignOutButton />
         </div>
       </header>
@@ -43,10 +44,10 @@ export default async function HomePage() {
         ))}
         <Link
           href="/sets/new"
-          className="bg-white rounded-xl border-2 border-dashed border-gray-200 p-5 flex flex-col items-center justify-center gap-2 text-gray-400 hover:border-green-400 hover:text-green-600 transition-colors min-h-[160px]"
+          className="bg-white rounded-2xl border-2 border-dashed border-qz-border p-5 flex flex-col items-center justify-center gap-2 text-qz-secondary hover:border-qz-blue hover:text-qz-blue transition-colors min-h-[160px] font-medium"
         >
           <span className="text-3xl">+</span>
-          <span className="font-medium">New Set</span>
+          <span>New Set</span>
         </Link>
       </div>
     </div>

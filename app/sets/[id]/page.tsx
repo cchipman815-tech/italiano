@@ -35,51 +35,53 @@ export default async function SetDetailPage({
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      <Link href="/home" className="text-sm text-gray-500 hover:text-gray-700 mb-6 inline-block">
+      <Link href="/home" className="text-sm text-qz-secondary hover:text-qz-text mb-6 inline-flex items-center gap-1 transition-colors">
         ← Back to sets
       </Link>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">{set.title}</h1>
-        {set.description && <p className="text-gray-500 mb-4">{set.description}</p>}
-        <div className="flex items-center gap-4 text-sm text-gray-600">
+      <div className="bg-white rounded-2xl border-2 border-qz-border p-6 mb-6" style={{ boxShadow: 'var(--qz-shadow-card)' }}>
+        <h1 className="text-2xl font-bold text-qz-text mb-1">{set.title}</h1>
+        {set.description && <p className="text-qz-secondary mb-4">{set.description}</p>}
+        <div className="flex items-center gap-4 text-sm text-qz-secondary">
           <span>{totalCards} terms</span>
           <span>{progress}% known</span>
         </div>
-        <div className="w-full bg-gray-100 rounded-full h-1.5 mt-3">
-          <div className="bg-green-500 h-1.5 rounded-full" style={{ width: `${progress}%` }} />
+        <div className="w-full bg-qz-subtle rounded-full h-1.5 mt-3">
+          <div className="bg-qz-blue h-1.5 rounded-full" style={{ width: `${progress}%` }} />
         </div>
       </div>
 
       <div className="flex flex-col gap-3">
         <Link
           href={`/sets/${id}/flashcard`}
-          className="flex items-center gap-4 bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow"
+          className="flex items-center gap-4 bg-white border-2 border-qz-border rounded-2xl p-5 hover:border-qz-blue transition-colors"
+          style={{ boxShadow: 'var(--qz-shadow-sm)' }}
         >
           <span className="text-3xl">🃏</span>
           <div>
-            <div className="font-semibold text-gray-900">Flashcards</div>
-            <div className="text-sm text-gray-500">Flip cards, mark what you know</div>
+            <div className="font-semibold text-qz-text">Flashcards</div>
+            <div className="text-sm text-qz-secondary">Flip cards, mark what you know</div>
           </div>
         </Link>
 
         {canStudyMulti ? (
           <Link
             href={`/sets/${id}/quiz`}
-            className="flex items-center gap-4 bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow"
+            className="flex items-center gap-4 bg-white border-2 border-qz-border rounded-2xl p-5 hover:border-qz-blue transition-colors"
+            style={{ boxShadow: 'var(--qz-shadow-sm)' }}
           >
             <span className="text-3xl">📝</span>
             <div>
-              <div className="font-semibold text-gray-900">Quiz</div>
-              <div className="text-sm text-gray-500">Multiple choice questions</div>
+              <div className="font-semibold text-qz-text">Quiz</div>
+              <div className="text-sm text-qz-secondary">Multiple choice questions</div>
             </div>
           </Link>
         ) : (
-          <div className="flex items-center gap-4 bg-gray-50 border border-gray-200 rounded-xl p-5 opacity-50 cursor-not-allowed">
+          <div className="flex items-center gap-4 bg-qz-subtle border-2 border-qz-border rounded-2xl p-5 opacity-50 cursor-not-allowed">
             <span className="text-3xl">📝</span>
             <div>
-              <div className="font-semibold text-gray-500">Quiz</div>
-              <div className="text-sm text-gray-400">Need at least 4 cards to enable</div>
+              <div className="font-semibold text-qz-secondary">Quiz</div>
+              <div className="text-sm text-qz-secondary">Need at least 4 cards to enable</div>
             </div>
           </div>
         )}
@@ -87,27 +89,28 @@ export default async function SetDetailPage({
         {canStudyMulti ? (
           <Link
             href={`/sets/${id}/match`}
-            className="flex items-center gap-4 bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow"
+            className="flex items-center gap-4 bg-white border-2 border-qz-border rounded-2xl p-5 hover:border-qz-blue transition-colors"
+            style={{ boxShadow: 'var(--qz-shadow-sm)' }}
           >
             <span className="text-3xl">🎯</span>
             <div>
-              <div className="font-semibold text-gray-900">Match</div>
-              <div className="text-sm text-gray-500">Click to pair Italian with English</div>
+              <div className="font-semibold text-qz-text">Match</div>
+              <div className="text-sm text-qz-secondary">Click to pair Italian with English</div>
             </div>
           </Link>
         ) : (
-          <div className="flex items-center gap-4 bg-gray-50 border border-gray-200 rounded-xl p-5 opacity-50 cursor-not-allowed">
+          <div className="flex items-center gap-4 bg-qz-subtle border-2 border-qz-border rounded-2xl p-5 opacity-50 cursor-not-allowed">
             <span className="text-3xl">🎯</span>
             <div>
-              <div className="font-semibold text-gray-500">Match</div>
-              <div className="text-sm text-gray-400">Need at least 4 cards to enable</div>
+              <div className="font-semibold text-qz-secondary">Match</div>
+              <div className="text-sm text-qz-secondary">Need at least 4 cards to enable</div>
             </div>
           </div>
         )}
 
         <Link
           href={`/sets/${id}/edit`}
-          className="text-center py-3 text-sm text-gray-500 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
+          className="text-center py-3 text-sm font-medium text-qz-secondary border-2 border-qz-border rounded-2xl hover:border-qz-blue hover:text-qz-blue transition-colors"
         >
           Edit this set
         </Link>

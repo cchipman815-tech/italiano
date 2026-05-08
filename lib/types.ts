@@ -12,12 +12,29 @@ export interface Set {
   created_at: string
 }
 
+export interface Conjugations {
+  present?: ConjugationForms
+  past?: ConjugationForms
+  future?: ConjugationForms
+}
+
+export interface ConjugationForms {
+  io: string
+  tu: string
+  'lui/lei': string
+  noi: string
+  voi: string
+  loro: string
+}
+
 export interface Card {
   id: string
   set_id: string
   italian: string
   english: string
   sort_order: number
+  conjugations: Conjugations | null
+  enabled: boolean
 }
 
 export interface Progress {

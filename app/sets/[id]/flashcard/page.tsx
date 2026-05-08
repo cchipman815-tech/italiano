@@ -27,8 +27,8 @@ export default async function FlashcardPage({
   if (data.cards.length === 0) {
     return (
       <div className="max-w-xl mx-auto px-4 py-16 text-center">
-        <p className="text-gray-500 mb-4">This set has no cards yet.</p>
-        <Link href={`/sets/${id}/edit`} className="text-green-600 hover:underline">
+        <p className="text-qz-secondary mb-4">This set has no cards yet.</p>
+        <Link href={`/sets/${id}/edit`} className="text-qz-blue hover:underline">
           Add some cards
         </Link>
       </div>
@@ -42,10 +42,10 @@ export default async function FlashcardPage({
   return (
     <div className="max-w-xl mx-auto px-4 py-6">
       <div className="flex items-center justify-between mb-2">
-        <Link href={`/sets/${id}`} className="text-sm text-gray-500 hover:text-gray-700">
+        <Link href={`/sets/${id}`} className="text-sm text-qz-secondary hover:text-qz-text transition-colors">
           ← {data.title}
         </Link>
-        <span className="text-sm font-medium text-gray-700">Flashcards</span>
+        <span className="text-sm font-medium text-qz-text">Flashcards</span>
       </div>
       <FlashcardStudy setId={id} cards={data.cards} initialProgress={initialProgress} />
     </div>
