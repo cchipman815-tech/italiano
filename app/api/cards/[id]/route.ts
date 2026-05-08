@@ -11,13 +11,15 @@ export async function PUT(
 
   const { id } = await params
   const body = await request.json()
-  const { italian, english, conjugations, enabled } = body
+  const { italian, english, conjugations, enabled, plural, example } = body
 
   const update: Record<string, unknown> = {}
   if (italian !== undefined) update.italian = italian
   if (english !== undefined) update.english = english
   if (conjugations !== undefined) update.conjugations = conjugations
   if (enabled !== undefined) update.enabled = enabled
+  if (plural !== undefined) update.plural = plural
+  if (example !== undefined) update.example = example
 
   const db = createServerClient()
   const { data, error } = await db

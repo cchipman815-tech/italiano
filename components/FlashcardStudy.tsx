@@ -124,6 +124,19 @@ export default function FlashcardStudy({ setId, cards, initialProgress }: Props)
                 <SpeakButton text={currentCard.italian} size="sm" />
               </div>
               <div className="text-3xl font-bold text-qz-text">{currentCard.english}</div>
+              {(currentCard.gender || currentCard.plural) && (
+                <div className="flex items-center gap-2 text-sm text-qz-secondary mt-1">
+                  {currentCard.gender && (
+                    <span>{currentCard.gender === 'm' ? '♂' : '♀'} {currentCard.italian}</span>
+                  )}
+                  {currentCard.plural && (
+                    <span className="text-qz-muted">·</span>
+                  )}
+                  {currentCard.plural && (
+                    <span>pl. <span className="font-medium text-qz-text">{currentCard.plural}</span></span>
+                  )}
+                </div>
+              )}
               {currentCard.conjugations?.present && (
                 <div className="mt-4 grid grid-cols-3 gap-x-6 gap-y-1 text-sm text-qz-secondary border-t border-qz-border pt-4 w-full max-w-xs">
                   {(['io', 'tu', 'lui/lei', 'noi', 'voi', 'loro'] as const).map(pronoun => (

@@ -141,7 +141,7 @@ export default function EditSetPage() {
     }
   }
 
-  async function handleSaveCard(cardId: string, fields: Partial<Pick<Card, 'italian' | 'english' | 'conjugations' | 'enabled'>>) {
+  async function handleSaveCard(cardId: string, fields: Partial<Pick<Card, 'italian' | 'english' | 'conjugations' | 'enabled' | 'plural'>>) {
     await fetch(`/api/cards/${cardId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },

@@ -6,7 +6,7 @@ import GenderBadge from '@/components/GenderBadge'
 
 interface Props {
   card: Card
-  onSave: (id: string, fields: Partial<Pick<Card, 'italian' | 'english' | 'conjugations' | 'enabled'>>) => Promise<void>
+  onSave: (id: string, fields: Partial<Pick<Card, 'italian' | 'english' | 'conjugations' | 'enabled' | 'plural'>>) => Promise<void>
   onDelete: (id: string) => Promise<void>
 }
 
@@ -18,6 +18,7 @@ export default function CardEditor({ card, onSave, onDelete }: Props) {
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
   const [showConjugations, setShowConjugations] = useState(false)
+  const [generatingPlural, setGeneratingPlural] = useState(false)
 
   const presentForms = card.conjugations?.present ?? null
   const [conjugations, setConjugations] = useState<ConjugationForms>(
@@ -45,6 +46,25 @@ export default function CardEditor({ card, onSave, onDelete }: Props) {
     await onSave(card.id, { conjugations: conjugationsPayload })
     setSaving(false)
     setShowConjugations(false)
+  }
+
+  async function handleGeneratePlural() {
+    setGeneratingPlural(true)
+    try {
+      const res = await fetch('/api/plural', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cardId: card.id, italian: card.italian, english: card.english }),
+      })
+      const data = await res.json()
+      if (data.plural) {
+        await onSave(card.id, { plural: data.plural })
+      }
+    } catch (err) {
+      console.error('Failed to generate plural:', err)
+    } finally {
+      setGeneratingPlural(false)
+    }
   }
 
   async function handleDelete() {
@@ -83,6 +103,18 @@ export default function CardEditor({ card, onSave, onDelete }: Props) {
             <span className="flex-1 text-qz-secondary">{card.english}</span>
             {hasConjugations && (
               <span className="text-xs text-qz-blue bg-qz-blue-light px-1.5 py-0.5 rounded-full font-medium">conjugated</span>
+            )}
+            {card.plural && (
+              <span className="text-xs text-qz-secondary">pl. <span className="font-medium text-qz-text">{card.plural}</span></span>
+            )}
+            {card.gender && !card.plural && !card.conjugations && (
+              <button
+                onClick={handleGeneratePlural}
+                disabled={generatingPlural}
+                className="text-xs text-qz-secondary hover:text-qz-text disabled:opacity-50 cursor-pointer transition-colors"
+              >
+                {generatingPlural ? 'generating…' : '+ plural'}
+              </button>
             )}
             <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
               <button onClick={() => setEditing(true)} className="text-xs text-qz-blue hover:text-qz-blue-dark font-medium cursor-pointer transition-colors">
