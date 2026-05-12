@@ -42,7 +42,8 @@ async function generateExample(italian: string, english: string): Promise<{ ital
     }],
   })
   const raw = message.content[0].type === 'text' ? message.content[0].text.trim() : ''
-  return JSON.parse(raw) as { italian: string; english: string }
+  const cleaned = raw.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '')
+  return JSON.parse(cleaned) as { italian: string; english: string }
 }
 
 async function main() {
