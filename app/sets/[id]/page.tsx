@@ -5,6 +5,7 @@ import { isValidUserId } from '@/lib/users'
 import { calculateProgress } from '@/lib/utils'
 import { isDueToday } from '@/lib/srs'
 import type { SetWithCards } from '@/lib/types'
+import StudyModePicker from '@/components/StudyModePicker'
 
 async function getSet(id: string, userId: number) {
   const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/sets/${id}`, {
@@ -60,109 +61,7 @@ export default async function SetDetailPage({
         </div>
       </div>
 
-      <div className="flex flex-col gap-3">
-        <Link
-          href={`/sets/${id}/flashcard`}
-          className="flex items-center gap-4 bg-white border-2 border-qz-border rounded-2xl p-5 hover:border-qz-blue transition-colors"
-          style={{ boxShadow: 'var(--qz-shadow-sm)' }}
-        >
-          <span className="text-3xl">🃏</span>
-          <div>
-            <div className="font-semibold text-qz-text">Flashcards</div>
-            <div className="text-sm text-qz-secondary">Flip cards, mark what you know</div>
-          </div>
-        </Link>
-
-        {canStudyMulti ? (
-          <Link
-            href={`/sets/${id}/quiz`}
-            className="flex items-center gap-4 bg-white border-2 border-qz-border rounded-2xl p-5 hover:border-qz-blue transition-colors"
-            style={{ boxShadow: 'var(--qz-shadow-sm)' }}
-          >
-            <span className="text-3xl">📝</span>
-            <div>
-              <div className="font-semibold text-qz-text">Quiz</div>
-              <div className="text-sm text-qz-secondary">Multiple choice questions</div>
-            </div>
-          </Link>
-        ) : (
-          <div className="flex items-center gap-4 bg-qz-subtle border-2 border-qz-border rounded-2xl p-5 opacity-50 cursor-not-allowed">
-            <span className="text-3xl">📝</span>
-            <div>
-              <div className="font-semibold text-qz-secondary">Quiz</div>
-              <div className="text-sm text-qz-secondary">Need at least 4 cards to enable</div>
-            </div>
-          </div>
-        )}
-
-        {canStudyMulti ? (
-          <Link
-            href={`/sets/${id}/match`}
-            className="flex items-center gap-4 bg-white border-2 border-qz-border rounded-2xl p-5 hover:border-qz-blue transition-colors"
-            style={{ boxShadow: 'var(--qz-shadow-sm)' }}
-          >
-            <span className="text-3xl">🎯</span>
-            <div>
-              <div className="font-semibold text-qz-text">Match</div>
-              <div className="text-sm text-qz-secondary">Click to pair Italian with English</div>
-            </div>
-          </Link>
-        ) : (
-          <div className="flex items-center gap-4 bg-qz-subtle border-2 border-qz-border rounded-2xl p-5 opacity-50 cursor-not-allowed">
-            <span className="text-3xl">🎯</span>
-            <div>
-              <div className="font-semibold text-qz-secondary">Match</div>
-              <div className="text-sm text-qz-secondary">Need at least 4 cards to enable</div>
-            </div>
-          </div>
-        )}
-
-        {canStudyMulti ? (
-          <Link
-            href={`/sets/${id}/listening`}
-            className="flex items-center gap-4 bg-white border-2 border-qz-border rounded-2xl p-5 hover:border-qz-blue transition-colors"
-            style={{ boxShadow: 'var(--qz-shadow-sm)' }}
-          >
-            <span className="text-3xl">🎧</span>
-            <div>
-              <div className="font-semibold text-qz-text">Listening</div>
-              <div className="text-sm text-qz-secondary">Hear Italian, pick the meaning</div>
-            </div>
-          </Link>
-        ) : (
-          <div className="flex items-center gap-4 bg-qz-subtle border-2 border-qz-border rounded-2xl p-5 opacity-50 cursor-not-allowed">
-            <span className="text-3xl">🎧</span>
-            <div>
-              <div className="font-semibold text-qz-secondary">Listening</div>
-              <div className="text-sm text-qz-secondary">Need at least 4 cards to enable</div>
-            </div>
-          </div>
-        )}
-
-        <Link
-          href={`/sets/${id}/review`}
-          className="flex items-center gap-4 bg-white border-2 border-qz-blue rounded-2xl p-5 hover:bg-qz-blue-light transition-colors"
-          style={{ boxShadow: 'var(--qz-shadow-sm)' }}
-        >
-          <span className="text-3xl">🔁</span>
-          <div className="flex-1">
-            <div className="font-semibold text-qz-blue">Review Due Cards</div>
-            <div className="text-sm text-qz-secondary">Spaced repetition — study what matters</div>
-          </div>
-          {dueCount > 0 && (
-            <span className="bg-qz-blue text-white text-xs font-bold px-2.5 py-1 rounded-full">
-              {dueCount} due
-            </span>
-          )}
-        </Link>
-
-        <Link
-          href={`/sets/${id}/edit`}
-          className="text-center py-3 text-sm font-medium text-qz-secondary border-2 border-qz-border rounded-2xl hover:border-qz-blue hover:text-qz-blue transition-colors"
-        >
-          Edit this set
-        </Link>
-      </div>
+      <StudyModePicker setId={id} canStudyMulti={canStudyMulti} dueCount={dueCount} />
     </div>
   )
 }

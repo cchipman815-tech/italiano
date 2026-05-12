@@ -7,8 +7,10 @@ import type { SetWithCards } from '@/lib/types'
 
 export default async function FlashcardPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ direction?: string }>
 }) {
   const cookieStore = await cookies()
   const raw = cookieStore.get('userId')?.value
@@ -16,6 +18,9 @@ export default async function FlashcardPage({
   if (!userId || !isValidUserId(userId)) redirect('/login')
 
   const { id } = await params
+  const { direction: dirParam } = await searchParams
+  const direction = dirParam === 'en-it' ? 'en-it' : 'it-en'
+
   const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/sets/${id}`, {
     headers: { Cookie: `userId=${userId}` },
     cache: 'no-store',
@@ -47,7 +52,7 @@ export default async function FlashcardPage({
         </Link>
         <span className="text-sm font-medium text-qz-text">Flashcards</span>
       </div>
-      <FlashcardStudy setId={id} cards={data.cards} initialProgress={initialProgress} />
+      <FlashcardStudy setId={id} cards={data.cards} initialProgress={initialProgress} direction={direction} />
     </div>
   )
 }
