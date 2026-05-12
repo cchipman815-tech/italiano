@@ -14,6 +14,7 @@
     "migrate:conjugation-cards": "npx tsx scripts/migrate-conjugation-cards.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.95.2",
     "@supabase/supabase-js": "^2.105.1",
     "next": "16.2.4",
     "react": "19.2.4",
