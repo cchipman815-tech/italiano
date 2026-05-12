@@ -10,7 +10,8 @@ export default function SpeakButton({ text, size = 'md' }: Props) {
   const [loading, setLoading] = useState(false)
   const [playing, setPlaying] = useState(false)
 
-  async function handleSpeak() {
+  async function handleSpeak(e: React.MouseEvent<HTMLButtonElement>) {
+    e.stopPropagation()
     if (loading || playing) return
     setLoading(true)
     try {
