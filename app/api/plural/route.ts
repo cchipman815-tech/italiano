@@ -1,39 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
+import Anthropic from '@anthropic-ai/sdk'
 import { createServerClient } from '@/lib/supabase'
 import { getUserIdFromCookie, unauthorized } from '@/lib/api-helpers'
 
-const TRANSLATE_URL = 'https://translation.googleapis.com/language/translate/v2'
-const API_KEY = process.env.GOOGLE_TRANSLATE_API_KEY!
+const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
-/**
- * Generate the Italian plural for a noun card and save it.
- *
- * Strategy: translate "the [english_word_plural]" into Italian,
- * then strip the article to get the bare plural form.
- *
- * POST /api/plural  { cardId, italian, english }
- * → { plural: string }
- */
-async function translateText(text: string, source: string, target: string): Promise<string> {
-  const res = await fetch(`${TRANSLATE_URL}?key=${API_KEY}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ q: text, source, target, format: 'text' }),
-  })
-  const data = await res.json()
-  if (!res.ok) throw new Error(data.error?.message ?? 'Translation failed')
-  return data.data.translations[0].translatedText as string
-}
-
-/**
- * Strip definite articles from an Italian phrase to get the bare plural noun.
- * e.g. "i libri" → "libri", "le donne" → "donne", "gli studenti" → "studenti"
- */
-function stripArticle(italian: string): string {
-  return italian
-    .replace(/^(il|lo|la|i|gli|le|l')\s+/i, '')
-    .trim()
-}
+const SYSTEM_PROMPT = `You are an Italian grammar expert.
+Given an Italian noun (singular form, without article), return its plural form.
+Return only the plural form — no article, no explanation.
+Example: "libro" → "libri", "uomo" → "uomini", "città" → "città"
+Respond with plain text only.`
 
 export async function POST(req: NextRequest) {
   const userId = getUserIdFromCookie()
@@ -50,27 +26,24 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    // Translate Italian → English to confirm we have the singular English word,
-    // then ask for the plural Italian by translating "the [english]s" back.
-    // This handles irregular plurals better than rule-based approaches.
-    const singularEnglish = english
-      .replace(/^(the|a|an)\s+/i, '')  // strip any article
-      .replace(/^to\s+/i, '')           // strip "to" from verbs
-      .trim()
+    const message = await client.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 20,
+      system: SYSTEM_PROMPT,
+      messages: [{
+        role: 'user',
+        content: `Italian noun (singular): "${italian}" (English: "${english}")\nPlural form:`,
+      }],
+    })
 
-    // Translate "the [word]s" (or "the [word]es") from English → Italian
-    // Google Translate handles the plural determination.
-    const pluralPhrase = await translateText(`the ${singularEnglish}s`, 'en', 'it')
+    const plural = message.content[0].type === 'text'
+      ? message.content[0].text.trim().toLowerCase()
+      : ''
 
-    const plural = stripArticle(pluralPhrase)
+    if (!plural) throw new Error('Empty response from Claude')
 
-    // Save to DB
     const db = createServerClient()
-    const { error } = await db
-      .from('cards')
-      .update({ plural })
-      .eq('id', cardId)
-
+    const { error } = await db.from('cards').update({ plural }).eq('id', cardId)
     if (error) throw error
 
     return NextResponse.json({ plural })

@@ -10,16 +10,32 @@ export async function PUT(
   if (!userId) return unauthorized()
 
   const { id } = await params
-  const body = await request.json()
-  const { italian, english, conjugations, enabled, plural, example } = body
+  const body = await request.json() as {
+    italian?: string
+    english?: string
+    conjugations?: unknown
+    enabled?: boolean
+    plural?: string | null
+    example?: { italian: string; english: string } | null
+    word_type?: string | null
+    article?: string | null
+    chapter?: number | null
+    adjective_forms?: { ms: string; fs: string; mp: string; fp: string } | null
+    tense?: string | null
+  }
 
   const update: Record<string, unknown> = {}
-  if (italian !== undefined) update.italian = italian
-  if (english !== undefined) update.english = english
-  if (conjugations !== undefined) update.conjugations = conjugations
-  if (enabled !== undefined) update.enabled = enabled
-  if (plural !== undefined) update.plural = plural
-  if (example !== undefined) update.example = example
+  if (body.italian          !== undefined) update.italian          = body.italian
+  if (body.english          !== undefined) update.english          = body.english
+  if (body.conjugations     !== undefined) update.conjugations     = body.conjugations
+  if (body.enabled          !== undefined) update.enabled          = body.enabled
+  if (body.plural           !== undefined) update.plural           = body.plural
+  if (body.example          !== undefined) update.example          = body.example
+  if (body.word_type        !== undefined) update.word_type        = body.word_type
+  if (body.article          !== undefined) update.article          = body.article
+  if (body.chapter          !== undefined) update.chapter          = body.chapter
+  if (body.adjective_forms  !== undefined) update.adjective_forms  = body.adjective_forms
+  if (body.tense            !== undefined) update.tense            = body.tense
 
   const db = createServerClient()
   const { data, error } = await db

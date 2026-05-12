@@ -27,6 +27,15 @@ export interface ConjugationForms {
   loro: string
 }
 
+export interface AdjForms {
+  ms: string
+  fs: string
+  mp: string
+  fp: string
+}
+
+export type WordType = 'noun' | 'verb' | 'adjective' | 'phrase' | 'expression'
+
 export interface Card {
   id: string
   set_id: string
@@ -38,6 +47,11 @@ export interface Card {
   gender?: 'm' | 'f' | null
   plural?: string | null
   example?: { italian: string; english: string } | null
+  chapter?: number | null
+  article?: string | null
+  word_type?: WordType | null
+  adjective_forms?: AdjForms | null
+  tense?: string | null
 }
 
 export interface Progress {

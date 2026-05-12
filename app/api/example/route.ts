@@ -1,65 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
+import Anthropic from '@anthropic-ai/sdk'
 import { createServerClient } from '@/lib/supabase'
 import { getUserIdFromCookie, unauthorized } from '@/lib/api-helpers'
 
-const TRANSLATE_URL = 'https://translation.googleapis.com/language/translate/v2'
-const API_KEY = process.env.GOOGLE_TRANSLATE_API_KEY!
+const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
-/**
- * Generate a natural example sentence for a card and save it.
- *
- * Strategy:
- * 1. Construct an English template sentence using the English word.
- * 2. Translate it to Italian.
- * 3. Save both as { italian, english } JSONB.
- *
- * POST /api/example  { cardId, italian, english }
- * → { example: { italian: string, english: string } }
- */
-async function translateText(text: string, source: string, target: string): Promise<string> {
-  const res = await fetch(`${TRANSLATE_URL}?key=${API_KEY}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ q: text, source, target, format: 'text' }),
-  })
-  const data = await res.json()
-  if (!res.ok) throw new Error(data.error?.message ?? 'Translation failed')
-  return data.data.translations[0].translatedText as string
-}
-
-/**
- * Build a simple, natural English example sentence for a word/phrase.
- * Uses the English value directly in a sentence template.
- */
-function buildEnglishExample(english: string): string {
-  const lower = english.toLowerCase().trim()
-
-  // Verb (starts with "to "): use "I [verb] every day."
-  if (lower.startsWith('to ')) {
-    const verb = lower.slice(3)
-    return `I ${verb} every day.`
-  }
-
-  // Number or ordinal: use "There are [word] students in the class."
-  if (/^\d+$/.test(lower)) {
-    return `There are ${lower} students in the class.`
-  }
-
-  // Phrase (contains spaces, not a noun with article): wrap in a sentence
-  const words = lower.split(' ')
-  if (words.length > 2 && !['the', 'a', 'an', 'il', 'la', 'lo', 'i', 'gli', 'le'].includes(words[0])) {
-    return `We often say: "${english}".`
-  }
-
-  // Noun (strip article): "The [noun] is on the table."
-  const noun = lower.replace(/^(the|a|an)\s+/i, '')
-  if (noun.length < 15) {
-    return `The ${noun} is very nice.`
-  }
-
-  // Fallback
-  return `Can you use "${english}" in a sentence?`
-}
+const SYSTEM_PROMPT = `You are an Italian language tutor helping beginners study.
+Generate one short, natural example sentence (5–10 words) using the given Italian word.
+Use only present-tense vocabulary appropriate for Prego! Italian chapter 1–3 level.
+No subjunctive, conditional, or complex tenses.
+Respond with JSON only: {"italian":"<sentence>","english":"<translation>"}
+No markdown, no explanation, no extra keys.`
 
 export async function POST(req: NextRequest) {
   const userId = getUserIdFromCookie()
@@ -76,17 +27,21 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const englishSentence = buildEnglishExample(english)
-    const italianSentence = await translateText(englishSentence, 'en', 'it')
+    const message = await client.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 150,
+      system: SYSTEM_PROMPT,
+      messages: [{
+        role: 'user',
+        content: `Italian word: "${italian}" (English: "${english}")\nGenerate an example sentence using this word.`,
+      }],
+    })
 
-    const example = { italian: italianSentence, english: englishSentence }
+    const raw = message.content[0].type === 'text' ? message.content[0].text.trim() : ''
+    const example = JSON.parse(raw) as { italian: string; english: string }
 
     const db = createServerClient()
-    const { error } = await db
-      .from('cards')
-      .update({ example })
-      .eq('id', cardId)
-
+    const { error } = await db.from('cards').update({ example }).eq('id', cardId)
     if (error) throw error
 
     return NextResponse.json({ example })
