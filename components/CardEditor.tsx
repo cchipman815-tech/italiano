@@ -1,12 +1,18 @@
 'use client'
 import { useState } from 'react'
-import type { Card, ConjugationForms } from '@/lib/types'
+import type { Card, ConjugationForms, WordType } from '@/lib/types'
 import SpeakButton from '@/components/SpeakButton'
 import GenderBadge from '@/components/GenderBadge'
 
 interface Props {
   card: Card
-  onSave: (id: string, fields: Partial<Pick<Card, 'italian' | 'english' | 'conjugations' | 'enabled' | 'plural' | 'example'>>) => Promise<void>
+  onSave: (
+    id: string,
+    fields: Partial<Pick<Card,
+      'italian' | 'english' | 'conjugations' | 'enabled' | 'plural' | 'example' |
+      'word_type' | 'article' | 'chapter' | 'tense' | 'adjective_forms'
+    >>
+  ) => Promise<void>
   onDelete: (id: string) => Promise<void>
 }
 
@@ -21,6 +27,17 @@ export default function CardEditor({ card, onSave, onDelete }: Props) {
   const [expanded, setExpanded] = useState(false)
   const [generatingPlural, setGeneratingPlural] = useState(false)
   const [generatingExample, setGeneratingExample] = useState(false)
+
+  const [wordType, setWordType] = useState<string>(card.word_type ?? '')
+  const [article, setArticle]   = useState(card.article ?? '')
+  const [chapter, setChapter]   = useState<string>(card.chapter?.toString() ?? '')
+  const [tense, setTense]       = useState(card.tense ?? 'present')
+  const [adjForms, setAdjForms] = useState({
+    ms: card.adjective_forms?.ms ?? '',
+    fs: card.adjective_forms?.fs ?? '',
+    mp: card.adjective_forms?.mp ?? '',
+    fp: card.adjective_forms?.fp ?? '',
+  })
 
   const presentForms = card.conjugations?.present ?? null
   const [conjugations, setConjugations] = useState<ConjugationForms>(
@@ -86,6 +103,18 @@ export default function CardEditor({ card, onSave, onDelete }: Props) {
     } finally {
       setGeneratingExample(false)
     }
+  }
+
+  async function handleSaveMetadata() {
+    setSaving(true)
+    await onSave(card.id, {
+      word_type:       (wordType as WordType) || null,
+      article:         article.trim() || null,
+      chapter:         chapter ? parseInt(chapter, 10) : null,
+      tense:           wordType === 'verb' ? tense : null,
+      adjective_forms: wordType === 'adjective' && adjForms.ms ? adjForms : null,
+    })
+    setSaving(false)
   }
 
   async function handleDelete() {
@@ -235,6 +264,91 @@ export default function CardEditor({ card, onSave, onDelete }: Props) {
               {card.example.english}
             </div>
           )}
+
+          {/* Metadata fields */}
+          <div className="border-t border-qz-border pt-3 mt-1 flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <label className="text-xs text-qz-secondary w-20 flex-shrink-0">Type</label>
+              <select
+                value={wordType}
+                onChange={e => setWordType(e.target.value)}
+                className="flex-1 border border-qz-border rounded-lg px-2 py-1 text-xs text-qz-text bg-white focus:outline-none focus:border-qz-blue"
+              >
+                <option value="">—</option>
+                <option value="noun">Noun</option>
+                <option value="verb">Verb</option>
+                <option value="adjective">Adjective</option>
+                <option value="phrase">Phrase</option>
+                <option value="expression">Expression</option>
+              </select>
+            </div>
+
+            {wordType === 'noun' && (
+              <div className="flex items-center gap-2">
+                <label className="text-xs text-qz-secondary w-20 flex-shrink-0">Article</label>
+                <input
+                  value={article}
+                  onChange={e => setArticle(e.target.value)}
+                  placeholder="il / la / lo / l'"
+                  className="flex-1 border border-qz-border rounded-lg px-2 py-1 text-xs text-qz-text bg-white focus:outline-none focus:border-qz-blue"
+                />
+              </div>
+            )}
+
+            <div className="flex items-center gap-2">
+              <label className="text-xs text-qz-secondary w-20 flex-shrink-0">Chapter</label>
+              <input
+                type="number"
+                value={chapter}
+                onChange={e => setChapter(e.target.value)}
+                placeholder="1–18"
+                min="1" max="18"
+                className="w-20 border border-qz-border rounded-lg px-2 py-1 text-xs text-qz-text bg-white focus:outline-none focus:border-qz-blue"
+              />
+            </div>
+
+            {wordType === 'verb' && (
+              <div className="flex items-center gap-2">
+                <label className="text-xs text-qz-secondary w-20 flex-shrink-0">Tense</label>
+                <select
+                  value={tense}
+                  onChange={e => setTense(e.target.value)}
+                  className="flex-1 border border-qz-border rounded-lg px-2 py-1 text-xs text-qz-text bg-white focus:outline-none focus:border-qz-blue"
+                >
+                  <option value="present">Present</option>
+                  <option value="past">Past</option>
+                  <option value="future">Future</option>
+                </select>
+              </div>
+            )}
+
+            {wordType === 'adjective' && (
+              <div className="flex flex-col gap-1">
+                <label className="text-xs text-qz-secondary">Adjective forms</label>
+                <div className="grid grid-cols-2 gap-1">
+                  {(['ms', 'fs', 'mp', 'fp'] as const).map(key => (
+                    <div key={key}>
+                      <label className="text-xs text-qz-muted">{key}</label>
+                      <input
+                        value={adjForms[key]}
+                        onChange={e => setAdjForms(prev => ({ ...prev, [key]: e.target.value }))}
+                        className="w-full border border-qz-border rounded-lg px-2 py-1 text-xs text-qz-text bg-white focus:outline-none focus:border-qz-blue"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={handleSaveMetadata}
+              disabled={saving}
+              className="self-start text-xs bg-qz-blue text-white px-3 py-1 rounded-full hover:bg-qz-blue-dark disabled:opacity-50 cursor-pointer font-semibold transition-colors"
+            >
+              {saving ? 'Saving…' : 'Save fields'}
+            </button>
+          </div>
 
           {/* Divider + actions */}
           <div className="border-t border-qz-border pt-2 flex items-center gap-3">

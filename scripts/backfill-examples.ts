@@ -2,15 +2,14 @@
  * backfill-examples.ts
  *
  * Generates example sentences for cards that don't have one yet.
- * Skips cards with conjugations (they have a conjugation table as study content).
- *
- * Strategy: build an English template sentence, translate EN→IT via Google Translate,
- * save both as { italian, english } JSONB to cards.example.
+ * Uses Claude (Anthropic SDK) for accurate, beginner-appropriate Italian.
  *
  * Run: npx tsx scripts/backfill-examples.ts
+ *      npx tsx scripts/backfill-examples.ts --dry-run   (list only, no API calls)
  */
 
 import { createClient } from '@supabase/supabase-js'
+import Anthropic from '@anthropic-ai/sdk'
 import * as dotenv from 'dotenv'
 dotenv.config({ path: '.env.local' })
 
@@ -18,84 +17,64 @@ const db = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
-const API_KEY = process.env.GOOGLE_TRANSLATE_API_KEY!
-const TRANSLATE_URL = 'https://translation.googleapis.com/language/translate/v2'
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
+const DRY_RUN = process.argv.includes('--dry-run')
+
+const SYSTEM_PROMPT = `You are an Italian language tutor helping beginners study.
+Generate one short, natural example sentence (5–10 words) using the given Italian word.
+Use only present-tense vocabulary appropriate for Prego! Italian chapter 1–3 level.
+No subjunctive, conditional, or complex tenses.
+Respond with JSON only: {"italian":"<sentence>","english":"<translation>"}
+No markdown, no explanation, no extra keys.`
 
 function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-async function translateText(text: string): Promise<string> {
-  const res = await fetch(`${TRANSLATE_URL}?key=${API_KEY}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ q: text, source: 'en', target: 'it', format: 'text' }),
+async function generateExample(italian: string, english: string): Promise<{ italian: string; english: string }> {
+  const message = await anthropic.messages.create({
+    model: 'claude-haiku-4-5-20251001',
+    max_tokens: 150,
+    system: SYSTEM_PROMPT,
+    messages: [{
+      role: 'user',
+      content: `Italian word: "${italian}" (English: "${english}")\nGenerate an example sentence using this word.`,
+    }],
   })
-  const data = await res.json()
-  if (!res.ok) throw new Error(data.error?.message ?? 'Translation failed')
-  return data.data.translations[0].translatedText as string
-}
-
-/**
- * Build a simple, natural English example sentence for a word/phrase.
- * Mirrors the logic in app/api/example/route.ts.
- */
-function buildEnglishExample(english: string): string {
-  const lower = english.toLowerCase().trim()
-
-  // Verb (starts with "to "): "I [verb] every day."
-  if (lower.startsWith('to ')) {
-    const verb = lower.slice(3)
-    return `I ${verb} every day.`
-  }
-
-  // Number: "There are [n] students in the class."
-  if (/^\d+$/.test(lower)) {
-    return `There are ${lower} students in the class.`
-  }
-
-  // Multi-word phrase without an article: wrap in quotes
-  const words = lower.split(' ')
-  if (words.length > 2 && !['the', 'a', 'an', 'il', 'la', 'lo', 'i', 'gli', 'le'].includes(words[0])) {
-    return `We often say: "${english}".`
-  }
-
-  // Noun: "The [noun] is very nice."
-  const noun = lower.replace(/^(the|a|an)\s+/i, '')
-  if (noun.length < 15) {
-    return `The ${noun} is very nice.`
-  }
-
-  // Fallback
-  return `Can you use "${english}" in a sentence?`
+  const raw = message.content[0].type === 'text' ? message.content[0].text.trim() : ''
+  return JSON.parse(raw) as { italian: string; english: string }
 }
 
 async function main() {
-  if (!API_KEY) throw new Error('GOOGLE_TRANSLATE_API_KEY is not set in .env.local')
+  if (!process.env.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY is not set in .env.local')
+
   console.log('Fetching cards without examples…')
   const { data: cards, error } = await db
     .from('cards')
-    .select('id, italian, english, conjugations')
+    .select('id, italian, english, conjugations, word_type')
     .is('example', null)
     .order('sort_order')
 
   if (error || !cards) throw error ?? new Error('No data returned')
   console.log(`Found ${cards.length} cards without examples.\n`)
 
-  // Skip conjugation cards
+  // Skip verb cards that have conjugation tables — they use the conjugation grid instead
   const todo = cards.filter(c => !c.conjugations)
   const skipped = cards.length - todo.length
   console.log(`${skipped} conjugation cards skipped. Processing ${todo.length}…\n`)
+
+  if (DRY_RUN) {
+    todo.forEach(c => console.log(`  would process: ${c.italian} (${c.english})`))
+    console.log('\nDry run complete — no API calls made.')
+    return
+  }
 
   let success = 0
   let failed = 0
 
   for (const card of todo) {
     try {
-      const englishSentence = buildEnglishExample(card.english)
-      const italianSentence = await translateText(englishSentence)
-
-      const example = { italian: italianSentence, english: englishSentence }
+      const example = await generateExample(card.italian, card.english)
 
       const { error: err } = await db
         .from('cards')
@@ -104,10 +83,10 @@ async function main() {
 
       if (err) throw err
 
-      console.log(`  ✓ ${card.italian} → "${italianSentence}"`)
+      console.log(`  ✓ ${card.italian} → "${example.italian}"`)
       success++
 
-      await sleep(100)
+      await sleep(200)
     } catch (err) {
       console.error(`  ✗ ${card.italian}: ${err instanceof Error ? err.message : err}`)
       failed++
