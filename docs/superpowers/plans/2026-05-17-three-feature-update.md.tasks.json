@@ -1,0 +1,33 @@
+{
+  "planPath": "docs/superpowers/plans/2026-05-17-three-feature-update.md",
+  "tasks": [
+    {
+      "id": 0,
+      "subject": "Task 1: Fix Sentence Practice Translation Answers",
+      "status": "pending",
+      "description": "**Goal:** Translation questions in Sentence Practice show Italian options when they should show English options (for IT→EN direction) and vice versa.\n\n**Files:**\n- Modify: `app/api/sentences/generate/route.ts`\n- Modify: `components/SentencePractice.tsx`\n\n**Acceptance Criteria:**\n- [ ] IT→EN direction shows English answer choices for translation questions\n- [ ] EN→IT direction shows Italian answer choices\n- [ ] Stale cached rows are detected and regenerated\n- [ ] TypeScript compiles with no errors\n\n**Verify:** Open Sentence Practice IT→EN, translation question choices are English sentences.\n\n```json:metadata\n{\"files\": [\"app/api/sentences/generate/route.ts\", \"components/SentencePractice.tsx\"], \"verifyCommand\": \"npx tsc --noEmit\", \"acceptanceCriteria\": [\"IT→EN translation questions show English choices\", \"EN→IT translation questions show Italian choices\", \"Stale cache detected and regenerated\", \"TypeScript compiles\"]}\n```"
+    },
+    {
+      "id": 1,
+      "subject": "Task 2: Add Word and Sentence Enrichment Modes to Translate API",
+      "status": "pending",
+      "blockedBy": [],
+      "description": "**Goal:** `/api/translate` handles `mode: 'word'` (article/gender/plural/grammarNote via Claude) and `mode: 'sentence'` (Italian + literalNote via Claude).\n\n**Files:**\n- Modify: `app/api/translate/route.ts`\n\n**Acceptance Criteria:**\n- [ ] `mode: 'word'` returns `{ italian, article, gender, plural, grammarNote }`\n- [ ] `mode: 'sentence'` returns `{ italian, literalNote }`\n- [ ] Existing modes unaffected\n- [ ] TypeScript compiles\n\n**Verify:** `curl -X POST /api/translate -d '{\"english\":\"backpack\",\"mode\":\"word\"}'` returns article/gender/plural.\n\n```json:metadata\n{\"files\": [\"app/api/translate/route.ts\"], \"verifyCommand\": \"npx tsc --noEmit\", \"acceptanceCriteria\": [\"word mode returns enriched metadata\", \"sentence mode returns literalNote\", \"existing translate and conjugations modes unaffected\"]}\n```"
+    },
+    {
+      "id": 2,
+      "subject": "Task 3: Build and Mount TranslatorWidget on Dashboard",
+      "status": "pending",
+      "blockedBy": [1],
+      "description": "**Goal:** Quick Translate panel above the set grid on the home page. Words return article/gender/plural/note; sentences return Italian + literal structure note.\n\n**Files:**\n- Create: `components/TranslatorWidget.tsx`\n- Modify: `app/home/page.tsx`\n\n**Acceptance Criteria:**\n- [ ] Widget visible above set grid on home dashboard\n- [ ] Single word returns article, gender, plural, grammar note badges\n- [ ] Multi-word phrase returns Italian + literal structure inset box\n- [ ] 🔊 button plays Italian pronunciation\n- [ ] Enter key submits, typing clears previous result\n- [ ] TypeScript compiles\n\n**Verify:** `npm run dev`, sign in, widget is above set cards. Test \"backpack\" and \"She speaks quickly\".\n\n```json:metadata\n{\"files\": [\"components/TranslatorWidget.tsx\", \"app/home/page.tsx\"], \"verifyCommand\": \"npx tsc --noEmit\", \"acceptanceCriteria\": [\"Widget visible above set grid\", \"Word result shows badges\", \"Sentence result shows literal note\", \"TTS works\", \"TypeScript compiles\"]}\n```"
+    },
+    {
+      "id": 3,
+      "subject": "Task 4: Build Conjugation Flashcard Mode",
+      "status": "pending",
+      "blockedBy": [],
+      "description": "**Goal:** Sets with verb conjugation data get a Conjugations study mode that drills all 6 pronoun forms per verb as individual flashcards.\n\n**Files:**\n- Create: `components/ConjugationStudy.tsx`\n- Create: `app/sets/[id]/conjugation/page.tsx`\n- Modify: `app/sets/[id]/page.tsx`\n- Modify: `components/StudyModePicker.tsx`\n\n**Acceptance Criteria:**\n- [ ] Sets with conjugation data show Conjugations in StudyModePicker\n- [ ] Sets without conjugation data do not show it\n- [ ] 6 cards per verb, shuffled, no progress saved to DB\n- [ ] IT→EN: front shows \"(io) ho\" + verb label, back shows \"I have\"\n- [ ] EN→IT: front shows \"I have\" + verb label, back shows \"(io) ho\" + speaker\n- [ ] Space/arrow keyboard shortcuts work\n- [ ] Session complete screen with score\n- [ ] TypeScript compiles\n\n**Verify:** Open a chapter set with verbs, StudyModePicker shows Conjugations. Click it, cards drill pronoun forms.\n\n```json:metadata\n{\"files\": [\"components/ConjugationStudy.tsx\", \"app/sets/[id]/conjugation/page.tsx\", \"app/sets/[id]/page.tsx\", \"components/StudyModePicker.tsx\"], \"verifyCommand\": \"npx tsc --noEmit\", \"acceptanceCriteria\": [\"Conjugations entry appears for sets with verb data\", \"Hidden for sets without verb data\", \"Cards drill pronoun forms correctly\", \"Both directions work\", \"Keyboard shortcuts work\", \"TypeScript compiles\"]}\n```"
+    }
+  ],
+  "lastUpdated": "2026-05-17T00:00:00.000Z"
+}

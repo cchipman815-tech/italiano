@@ -1,6 +1,6 @@
 # Italiano — Claude Reference
 
-Italian language flashcard/study app for Chance and Jennifer. Built with Next.js 16 App Router, React 19, TypeScript, Tailwind CSS v4, and Supabase Postgres. Deployed at https://italiano-beta.vercel.app.
+Italian language flashcard/study app for Chance and Jennifer. Built with Next.js 16 App Router, React 19, TypeScript, Tailwind CSS v4, and Supabase Postgres. Deployed at https://italiano-prego.vercel.app.
 
 ---
 
@@ -28,6 +28,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY   Supabase anon key
 SUPABASE_SERVICE_ROLE_KEY       Supabase service role key (server-only)
 NEXT_PUBLIC_APP_URL             App base URL (http://localhost:3000 locally)
 GOOGLE_TRANSLATE_API_KEY        Single key used for both Translation and TTS APIs
+ANTHROPIC_API_KEY               Claude API key (used by translate word/sentence modes and sentence generation)
 ```
 
 ---

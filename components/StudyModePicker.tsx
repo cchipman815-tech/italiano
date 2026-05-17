@@ -6,9 +6,10 @@ interface Props {
   setId: string
   canStudyMulti: boolean
   dueCount: number
+  hasConjugations: boolean
 }
 
-export default function StudyModePicker({ setId, canStudyMulti, dueCount }: Props) {
+export default function StudyModePicker({ setId, canStudyMulti, dueCount, hasConjugations }: Props) {
   const [direction, setDirection] = useState<'it-en' | 'en-it'>('it-en')
 
   return (
@@ -51,6 +52,20 @@ export default function StudyModePicker({ setId, canStudyMulti, dueCount }: Prop
           <div className="text-sm text-qz-secondary">Flip cards, mark what you know</div>
         </div>
       </Link>
+
+      {hasConjugations && (
+        <Link
+          href={`/sets/${setId}/conjugation?direction=${direction}`}
+          className="flex items-center gap-4 bg-white border-2 border-qz-border rounded-2xl p-5 hover:border-qz-blue transition-colors"
+          style={{ boxShadow: 'var(--qz-shadow-sm)' }}
+        >
+          <span className="text-3xl">🔤</span>
+          <div>
+            <div className="font-semibold text-qz-text">Conjugations</div>
+            <div className="text-sm text-qz-secondary">Drill every verb form as a flashcard</div>
+          </div>
+        </Link>
+      )}
 
       <Link
         href={`/sets/${setId}/sentence-practice?direction=${direction}`}

@@ -1,4 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server'
+import Anthropic from '@anthropic-ai/sdk'
+
+const claude = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+
+const CLAUDE_MODEL = 'claude-haiku-4-5-20251001'
+
+async function callClaude(prompt: string): Promise<{ ok: true; cleaned: string } | { ok: false; response: ReturnType<typeof NextResponse.json> }> {
+  let message
+  try {
+    message = await claude.messages.create({
+      model: CLAUDE_MODEL,
+      max_tokens: 200,
+      messages: [{ role: 'user', content: prompt }],
+    })
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Claude API error'
+    return { ok: false, response: NextResponse.json({ error: msg }, { status: 500 }) }
+  }
+  const raw = message.content[0]?.type === 'text' ? message.content[0].text.trim() : '{}'
+  const cleaned = raw.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '')
+  return { ok: true, cleaned }
+}
 
 const API_KEY = process.env.GOOGLE_TRANSLATE_API_KEY
 const TRANSLATE_URL = 'https://translation.googleapis.com/language/translate/v2'
@@ -47,6 +69,42 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    if (mode === 'word') {
+      if (!process.env.ANTHROPIC_API_KEY) {
+        return NextResponse.json({ error: 'Claude API not configured' }, { status: 500 })
+      }
+      const italian = await translateText(english.trim())
+      const safeEnglish = english.trim().replace(/"/g, '')
+      const result = await callClaude(
+        `Given the Italian word "${italian}" (English: "${safeEnglish}"), return ONLY valid JSON:\n{"article":"lo","gender":"m","plural":"gli zaini","grammarNote":"Uses lo/gli because it starts with z-"}\nRules: article is the definite singular form; gender is "m" or "f"; plural includes the definite article; grammarNote is one short sentence or empty string.`
+      )
+      if (!result.ok) return result.response
+      try {
+        const meta = JSON.parse(result.cleaned)
+        return NextResponse.json({ italian, ...meta })
+      } catch {
+        return NextResponse.json({ error: 'Claude returned invalid JSON' }, { status: 500 })
+      }
+    }
+
+    if (mode === 'sentence') {
+      if (!process.env.ANTHROPIC_API_KEY) {
+        return NextResponse.json({ error: 'Claude API not configured' }, { status: 500 })
+      }
+      const italian = await translateText(english.trim())
+      const safeEnglish = english.trim().replace(/"/g, '')
+      const result = await callClaude(
+        `English: "${safeEnglish}"\nItalian: "${italian}"\nReturn ONLY valid JSON with one field:\n{"literalNote":"Short explanation of what structurally changed, e.g. velocemente = a single adverb where English uses speak quickly"}\nKeep literalNote under 120 characters.`
+      )
+      if (!result.ok) return result.response
+      try {
+        const meta = JSON.parse(result.cleaned)
+        return NextResponse.json({ italian, ...meta })
+      } catch {
+        return NextResponse.json({ error: 'Claude returned invalid JSON' }, { status: 500 })
+      }
+    }
+
     if (mode === 'conjugations') {
       // Generate individual conjugation cards via translation
       const base = verbBase(english)

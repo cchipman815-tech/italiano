@@ -147,27 +147,29 @@ function TranslationView({ q, selected, onAnswer, onNext, direction }: {
   q: TranslationQuestion; selected: string | null; onAnswer: (o: string) => void; onNext: () => void
   direction: 'it-en' | 'en-it'
 }) {
-  const prompt = direction === 'it-en' ? q.italian : q.english
-  const hint   = direction === 'it-en' ? 'Choose the correct English translation ↓' : 'Choose the correct Italian translation ↓'
+  const prompt  = direction === 'it-en' ? q.italian : q.english
+  const hint    = direction === 'it-en' ? 'Choose the correct English translation ↓' : 'Choose the correct Italian translation ↓'
+  const options = direction === 'it-en' ? q.options_en : q.options_it
+  const correct = direction === 'it-en' ? q.correct_en : q.correct_it
   return (
     <>
       <FormatPill type="translation" />
       <p className="text-xl font-semibold text-qz-text mt-3 mb-1.5 w-full text-left">{prompt}</p>
       <p className="text-xs text-qz-muted mb-4 w-full text-left">{hint}</p>
       <div className="flex flex-col gap-2 w-full mb-2">
-        {q.options.map(opt => (
+        {options.map(opt => (
           <button
             key={opt}
             onClick={() => !selected && onAnswer(opt)}
             disabled={!!selected}
-            className={optionClass(opt, selected, q.correct)}
+            className={optionClass(opt, selected, correct)}
           >
             {opt}
           </button>
         ))}
       </div>
       {selected && (
-        <FeedbackBar correct={selected === q.correct} grammarNote={q.grammarNote} onNext={onNext} />
+        <FeedbackBar correct={selected === correct} grammarNote={q.grammarNote} onNext={onNext} />
       )}
     </>
   )
@@ -186,7 +188,10 @@ export default function SentencePractice({ setId, questions, direction = 'it-en'
   function isCorrectAnswer(option: string): boolean {
     if (q.type === 'fill_blank')  return option === q.blankWord
     if (q.type === 'dialogue')    return option === q.correct
-    if (q.type === 'translation') return option === q.correct
+    if (q.type === 'translation') {
+      const correct = direction === 'it-en' ? q.correct_en : q.correct_it
+      return option === correct
+    }
     return false
   }
 
