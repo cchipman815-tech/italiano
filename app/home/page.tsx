@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import SetCard from '@/components/SetCard'
 import SignOutButton from '@/components/SignOutButton'
+import TranslatorWidget from '@/components/TranslatorWidget'
 import { isValidUserId, getUserById } from '@/lib/users'
 import type { SetWithProgress } from '@/lib/types'
 
@@ -37,6 +38,8 @@ export default async function HomePage() {
           <SignOutButton />
         </div>
       </header>
+
+      <TranslatorWidget />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {sets.map(set => (
