@@ -28,9 +28,9 @@ export default async function ConjugationPage({
   if (!res.ok) notFound()
 
   const data: SetWithCards = await res.json()
-  const verbCards = data.cards.filter(c => c.conjugations?.present != null)
+  const hasVerbCards = data.cards.some(c => c.conjugations?.present != null)
 
-  if (verbCards.length === 0) {
+  if (!hasVerbCards) {
     return (
       <div className="max-w-xl mx-auto px-4 py-16 text-center">
         <p className="text-qz-secondary mb-4">No conjugation data in this set.</p>

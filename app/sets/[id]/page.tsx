@@ -34,7 +34,7 @@ export default async function SetDetailPage({
   const knownCards = set.progress.filter(p => p.known).length
   const progress = calculateProgress(knownCards, totalCards)
   const canStudyMulti = totalCards >= 4
-  const hasConjugations = set.cards.some(c => c.conjugations?.present != null)
+  const hasConjugations = set.cards.some(c => c.enabled !== false && c.conjugations?.present != null)
 
   // SRS: count cards due today
   const progressMap = Object.fromEntries(set.progress.map(p => [p.card_id, p]))

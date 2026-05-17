@@ -28,7 +28,7 @@ function verbBase(english: string): string {
 
 function buildDeck(cards: Card[]): ConjugationItem[] {
   const items: ConjugationItem[] = []
-  for (const card of cards) {
+  for (const card of cards.filter(c => c.enabled !== false)) {
     const present = card.conjugations?.present
     if (!present) continue
     const base = verbBase(card.english)
@@ -65,6 +65,14 @@ export default function ConjugationStudy({ setId, cards, direction = 'it-en' }: 
   const [done,    setDone]    = useState(false)
 
   const current = deck[index]
+
+  if (deck.length === 0) {
+    return (
+      <div className="text-center py-16 text-qz-secondary">
+        No conjugation cards available.
+      </div>
+    )
+  }
 
   const advance = useCallback((known: boolean) => {
     if (known) setScore(s => s + 1)
