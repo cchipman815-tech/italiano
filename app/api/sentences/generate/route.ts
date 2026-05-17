@@ -29,8 +29,10 @@ export type TranslationQuestion = {
   type: 'translation'
   italian: string
   english: string
-  options: string[]
-  correct: string
+  options_it: string[]
+  correct_it: string
+  options_en: string[]
+  correct_en: string
   grammarNote: string
 }
 
@@ -65,8 +67,10 @@ Return ONLY valid JSON with this exact shape (no markdown, no extra text):
       "type": "translation",
       "italian": "Lei è alta e intelligente.",
       "english": "She is tall and intelligent.",
-      "options": ["Lei è alto e intelligente.", "Lei è alta e intelligente.", "Lui è alta e intelligente."],
-      "correct": "Lei è alta e intelligente.",
+      "options_it": ["Lei è alto e intelligente.", "Lei è alta e intelligente.", "Lui è alta e intelligente."],
+      "correct_it": "Lei è alta e intelligente.",
+      "options_en": ["She is tall and intelligent.", "He is tall and intelligent.", "She is short and intelligent."],
+      "correct_en": "She is tall and intelligent.",
       "grammar_note": "alta — feminine singular of alto"
     }
   ]
@@ -75,7 +79,7 @@ Return ONLY valid JSON with this exact shape (no markdown, no extra text):
 Rules:
 - fill_blank: use ___ as placeholder; blank a verb form, noun, or adjective — never articles or prepositions; options array has exactly 4 items including the correct answer
 - dialogue: 2 speakers, 2–3 lines each; question must be answerable from the dialogue; options array has exactly 3 items
-- translation: include one subtle grammar trap (gender agreement, word order); options array has exactly 3 items
+- translation: include one subtle grammar trap in options_it (gender agreement, word order); options_it has exactly 3 Italian variants; options_en has exactly 3 English translations with subtle meaning differences; correct_it and correct_en are the correct answers
 - All content must be Prego chapter 1–3 beginner level`
 
 export async function POST(req: NextRequest) {
@@ -96,7 +100,16 @@ export async function POST(req: NextRequest) {
     .order('created_at', { ascending: true })
 
   if (cached && cached.length >= 10) {
-    return NextResponse.json({ questions: rowsToQuestions(cached) })
+    // Detect stale cached rows that use the old options/correct format
+    const translationRows = cached.filter(r => r.type === 'translation')
+    const hasOldFormat = translationRows.some(r => {
+      const m = r.metadata as Record<string, unknown>
+      return m.options !== undefined && m.options_en === undefined
+    })
+    if (!hasOldFormat) {
+      return NextResponse.json({ questions: rowsToQuestions(cached) })
+    }
+    // Fall through — stale data will be deleted below before regenerating
   }
 
   // Fetch enabled cards for vocab context
@@ -174,7 +187,13 @@ export async function POST(req: NextRequest) {
         type:     'translation' as const,
         italian:  q.italian as string,
         english:  q.english as string,
-        metadata: { options: q.options, correct: q.correct, grammarNote: q.grammar_note },
+        metadata: {
+          options_it:  q.options_it,
+          correct_it:  q.correct_it,
+          options_en:  q.options_en,
+          correct_en:  q.correct_en,
+          grammarNote: q.grammar_note,
+        },
       }
     }
   })
@@ -221,8 +240,10 @@ function rowsToQuestions(
         type:        'translation',
         italian:     row.italian,
         english:     row.english,
-        options:     m.options as string[],
-        correct:     m.correct as string,
+        options_it:  m.options_it as string[],
+        correct_it:  m.correct_it as string,
+        options_en:  m.options_en as string[],
+        correct_en:  m.correct_en as string,
         grammarNote: m.grammarNote as string,
       } satisfies TranslationQuestion
     }
