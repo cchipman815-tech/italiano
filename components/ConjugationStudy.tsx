@@ -66,14 +66,6 @@ export default function ConjugationStudy({ setId, cards, direction = 'it-en' }: 
 
   const current = deck[index]
 
-  if (deck.length === 0) {
-    return (
-      <div className="text-center py-16 text-qz-secondary">
-        No conjugation cards available.
-      </div>
-    )
-  }
-
   const advance = useCallback((known: boolean) => {
     if (known) setScore(s => s + 1)
     setFlipped(false)
@@ -95,6 +87,14 @@ export default function ConjugationStudy({ setId, cards, direction = 'it-en' }: 
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
   }, [flipped, advance])
+
+  if (deck.length === 0) {
+    return (
+      <div className="text-center py-16 text-qz-secondary">
+        No conjugation cards available.
+      </div>
+    )
+  }
 
   if (done) {
     return (
