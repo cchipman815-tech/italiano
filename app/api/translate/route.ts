@@ -62,9 +62,6 @@ export async function POST(req: NextRequest) {
   if (!API_KEY) {
     return NextResponse.json({ error: 'Translation API not configured' }, { status: 500 })
   }
-  if (!process.env.ANTHROPIC_API_KEY) {
-    return NextResponse.json({ error: 'Claude API not configured' }, { status: 500 })
-  }
 
   const { english, mode } = await req.json()
   if (!english?.trim()) {
@@ -73,6 +70,9 @@ export async function POST(req: NextRequest) {
 
   try {
     if (mode === 'word') {
+      if (!process.env.ANTHROPIC_API_KEY) {
+        return NextResponse.json({ error: 'Claude API not configured' }, { status: 500 })
+      }
       const italian = await translateText(english.trim())
       const safeEnglish = english.trim().replace(/"/g, '')
       const result = await callClaude(
@@ -88,6 +88,9 @@ export async function POST(req: NextRequest) {
     }
 
     if (mode === 'sentence') {
+      if (!process.env.ANTHROPIC_API_KEY) {
+        return NextResponse.json({ error: 'Claude API not configured' }, { status: 500 })
+      }
       const italian = await translateText(english.trim())
       const safeEnglish = english.trim().replace(/"/g, '')
       const result = await callClaude(

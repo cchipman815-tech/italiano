@@ -28,7 +28,7 @@ export default async function ConjugationPage({
   if (!res.ok) notFound()
 
   const data: SetWithCards = await res.json()
-  const hasVerbCards = data.cards.some(c => c.conjugations?.present != null)
+  const hasVerbCards = data.cards.some(c => c.enabled !== false && c.conjugations?.present != null)
 
   if (!hasVerbCards) {
     return (

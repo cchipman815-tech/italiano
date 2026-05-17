@@ -58,7 +58,7 @@ interface Props {
 
 export default function ConjugationStudy({ setId, cards, direction = 'it-en' }: Props) {
   const router = useRouter()
-  const [deck]    = useState(() => buildDeck(cards))
+  const [deck, setDeck] = useState(() => buildDeck(cards))
   const [index,   setIndex]   = useState(0)
   const [flipped, setFlipped] = useState(false)
   const [score,   setScore]   = useState(0)
@@ -107,7 +107,7 @@ export default function ConjugationStudy({ setId, cards, direction = 'it-en' }: 
         </div>
         <div className="flex gap-3 mt-2">
           <button
-            onClick={() => { setIndex(0); setFlipped(false); setScore(0); setDone(false) }}
+            onClick={() => { setDeck(buildDeck(cards)); setIndex(0); setFlipped(false); setScore(0); setDone(false) }}
             className="px-6 py-2.5 bg-qz-blue text-white rounded-full font-semibold hover:bg-qz-blue-dark cursor-pointer transition-colors"
           >
             Study Again
