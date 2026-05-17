@@ -38,9 +38,28 @@ export default function TranslatorWidget() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ english: trimmed, mode }),
       })
-      const data = await res.json()
-      if (data.error) throw new Error(data.error)
-      setResult({ type: mode, ...data } as TranslateResult)
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({})) as { error?: string }
+        throw new Error(errData.error ?? `HTTP ${res.status}`)
+      }
+      const data = await res.json() as Record<string, unknown>
+      if (data.error) throw new Error(String(data.error))
+      if (mode === 'word') {
+        setResult({
+          type: 'word',
+          italian:     String(data.italian     ?? ''),
+          article:     String(data.article     ?? ''),
+          gender:      data.gender === 'f' ? 'f' : 'm',
+          plural:      String(data.plural      ?? ''),
+          grammarNote: String(data.grammarNote ?? ''),
+        })
+      } else {
+        setResult({
+          type: 'sentence',
+          italian:     String(data.italian     ?? ''),
+          literalNote: String(data.literalNote ?? ''),
+        })
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Translation failed')
     } finally {
@@ -82,14 +101,18 @@ export default function TranslatorWidget() {
                 <SpeakButton text={result.italian} />
               </div>
               <div className="flex flex-wrap gap-2 mb-2">
-                <span className="bg-qz-blue-light text-qz-blue text-xs font-semibold px-2.5 py-1 rounded-full">
-                  {result.article}
-                </span>
-                <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-                  result.gender === 'm' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700'
-                }`}>
-                  {result.gender === 'm' ? 'masculine' : 'feminine'}
-                </span>
+                {result.article && (
+                  <span className="bg-qz-blue-light text-qz-blue text-xs font-semibold px-2.5 py-1 rounded-full">
+                    {result.article}
+                  </span>
+                )}
+                {result.article && (
+                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+                    result.gender === 'm' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700'
+                  }`}>
+                    {result.gender === 'm' ? 'masculine' : 'feminine'}
+                  </span>
+                )}
                 {result.plural && (
                   <span className="bg-green-50 text-green-700 text-xs font-semibold px-2.5 py-1 rounded-full">
                     pl. {result.plural}
