@@ -63,9 +63,24 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Translation API not configured' }, { status: 500 })
   }
 
-  const { english, mode } = await req.json()
+  const body = await req.json()
+  const { mode } = body
+  // Support both `english` (legacy EN→IT) and `text` (IT→EN) as the input field
+  const english: string | undefined = body.english ?? body.text
   if (!english?.trim()) {
-    return NextResponse.json({ error: 'Missing english text' }, { status: 400 })
+    return NextResponse.json({ error: 'Missing input text' }, { status: 400 })
+  }
+
+  // IT→EN simple translation
+  if (mode === 'it-en') {
+    const res = await fetch(`${TRANSLATE_URL}?key=${API_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ q: english.trim(), source: 'it', target: 'en', format: 'text' }),
+    })
+    const data = await res.json()
+    if (!res.ok) return NextResponse.json({ error: data.error?.message ?? 'Translation failed' }, { status: 500 })
+    return NextResponse.json({ english: data.data.translations[0].translatedText as string })
   }
 
   try {

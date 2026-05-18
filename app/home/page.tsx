@@ -2,7 +2,7 @@ import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import SetCard from '@/components/SetCard'
-import SignOutButton from '@/components/SignOutButton'
+import AppNav from '@/components/AppNav'
 import TranslatorWidget from '@/components/TranslatorWidget'
 import { isValidUserId, getUserById } from '@/lib/users'
 import type { SetWithProgress } from '@/lib/types'
@@ -26,33 +26,24 @@ export default async function HomePage() {
   const sets = await getSets(userId)
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <header className="flex items-center justify-between mb-8 bg-white rounded-2xl px-6 py-4 border-2 border-qz-border"
-        style={{ boxShadow: 'var(--qz-shadow-sm)' }}>
-        <div className="flex items-center gap-3">
-          <span className="text-3xl">🇮🇹</span>
-          <h1 className="text-xl font-bold text-qz-text">Italiano</h1>
-        </div>
-        <div className="flex items-center gap-4">
-          <span className="text-qz-secondary font-medium">{user.name}</span>
-          <SignOutButton />
-        </div>
-      </header>
+    <>
+      <AppNav userInitial={user.name[0]} />
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <TranslatorWidget />
 
-      <TranslatorWidget />
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {sets.map(set => (
-          <SetCard key={set.id} set={set} />
-        ))}
-        <Link
-          href="/sets/new"
-          className="bg-white rounded-2xl border-2 border-dashed border-qz-border p-5 flex flex-col items-center justify-center gap-2 text-qz-secondary hover:border-qz-blue hover:text-qz-blue transition-colors min-h-[160px] font-medium"
-        >
-          <span className="text-3xl">+</span>
-          <span>New Set</span>
-        </Link>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {sets.map(set => (
+            <SetCard key={set.id} set={set} />
+          ))}
+          <Link
+            href="/sets/new"
+            className="bg-white rounded-2xl border-2 border-dashed border-qz-border p-5 flex flex-col items-center justify-center gap-2 text-qz-secondary hover:border-qz-blue hover:text-qz-blue transition-colors min-h-[160px] font-medium"
+          >
+            <span className="text-3xl">+</span>
+            <span>New Set</span>
+          </Link>
+        </div>
       </div>
-    </div>
+    </>
   )
 }
