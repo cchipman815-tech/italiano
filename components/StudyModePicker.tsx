@@ -1,65 +1,20 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
+import {
+  FlashcardIcon,
+  ConjugationIcon,
+  SentenceIcon,
+  QuizIcon,
+  ListeningIcon,
+  ReviewIcon,
+} from '@/components/StudyIcons'
 
 interface Props {
   setId: string
   canStudyMulti: boolean
   dueCount: number
   hasConjugations: boolean
-}
-
-function FlashcardIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="4" width="20" height="14" rx="2"/>
-      <path d="M8 20h8M12 18v2"/>
-    </svg>
-  )
-}
-
-function ConjugationIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="3" width="18" height="18" rx="2"/>
-      <path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>
-    </svg>
-  )
-}
-
-function SentenceIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-    </svg>
-  )
-}
-
-function QuizIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M9 11l3 3L22 4"/>
-      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-    </svg>
-  )
-}
-
-function ListeningIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
-      <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
-    </svg>
-  )
-}
-
-function ReviewIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M1 4v6h6"/>
-      <path d="M3.51 15a9 9 0 1 0 .49-4.98"/>
-    </svg>
-  )
 }
 
 export default function StudyModePicker({ setId, canStudyMulti, dueCount, hasConjugations }: Props) {
@@ -93,6 +48,24 @@ export default function StudyModePicker({ setId, canStudyMulti, dueCount, hasCon
           </button>
         </div>
       </div>
+
+      {/* Review Due Cards — prominent at top */}
+      <Link
+        href={`/sets/${setId}/review`}
+        className="flex items-center gap-4 bg-white border-2 border-qz-blue rounded-2xl p-5 hover:bg-qz-blue-light transition-colors"
+        style={{ boxShadow: 'var(--qz-shadow-sm)' }}
+      >
+        <span className="text-qz-blue"><ReviewIcon /></span>
+        <div className="flex-1">
+          <div className="font-semibold text-qz-blue">Review Due Cards</div>
+          <div className="text-sm text-qz-secondary">Spaced repetition — study what matters</div>
+        </div>
+        {dueCount > 0 && (
+          <span className="bg-qz-blue text-white text-xs font-bold px-2.5 py-1 rounded-full">
+            {dueCount} due
+          </span>
+        )}
+      </Link>
 
       {/* Core Study section */}
       <p className="text-xs font-bold uppercase tracking-wider text-qz-secondary pt-4">Core Study</p>
@@ -130,7 +103,7 @@ export default function StudyModePicker({ setId, canStudyMulti, dueCount, hasCon
       >
         <span className="text-qz-blue"><SentenceIcon /></span>
         <div>
-          <div className="font-semibold text-qz-text">Sentence Practice</div>
+          <div className="font-semibold text-qz-text">Sentences</div>
           <div className="text-sm text-qz-secondary">Fill-in-blank, dialogue, and translation</div>
         </div>
       </Link>
@@ -181,23 +154,6 @@ export default function StudyModePicker({ setId, canStudyMulti, dueCount, hasCon
           </div>
         </div>
       )}
-
-      <Link
-        href={`/sets/${setId}/review`}
-        className="flex items-center gap-4 bg-white border-2 border-qz-blue rounded-2xl p-5 hover:bg-qz-blue-light transition-colors"
-        style={{ boxShadow: 'var(--qz-shadow-sm)' }}
-      >
-        <span className="text-qz-blue"><ReviewIcon /></span>
-        <div className="flex-1">
-          <div className="font-semibold text-qz-blue">Review Due Cards</div>
-          <div className="text-sm text-qz-secondary">Spaced repetition — study what matters</div>
-        </div>
-        {dueCount > 0 && (
-          <span className="bg-qz-blue text-white text-xs font-bold px-2.5 py-1 rounded-full">
-            {dueCount} due
-          </span>
-        )}
-      </Link>
 
       <Link
         href={`/sets/${setId}/edit`}

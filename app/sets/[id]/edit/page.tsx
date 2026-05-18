@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import CardEditor from '@/components/CardEditor'
+import AppNav from '@/components/AppNav'
 import type { Card, Set as FlashSet } from '@/lib/types'
 
 interface VerbGroup {
@@ -162,9 +163,9 @@ export default function EditSetPage() {
   }
 
   async function handleToggleGroup(group: VerbGroup, enable: boolean) {
-    // Update all conjugation cards in this group at once
+    const cardsToToggle = [group.verb, ...group.conjugations]
     await Promise.all(
-      group.conjugations.map(card =>
+      cardsToToggle.map(card =>
         fetch(`/api/cards/${card.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -172,7 +173,7 @@ export default function EditSetPage() {
         })
       )
     )
-    const ids = new Set(group.conjugations.map(c => c.id))
+    const ids = new Set(cardsToToggle.map(c => c.id))
     setCards(prev => prev.map(c => ids.has(c.id) ? { ...c, enabled: enable } : c))
   }
 
@@ -190,7 +191,9 @@ export default function EditSetPage() {
   const inputCls = "w-full border-2 border-qz-border rounded-xl px-3 py-2.5 text-qz-text text-sm placeholder:text-qz-secondary focus:outline-none focus:border-qz-blue transition-colors bg-white"
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
+    <>
+    <AppNav />
+    <div className="max-w-4xl mx-auto px-4 py-8">
       <Link href={`/sets/${id}`} className="text-sm text-qz-secondary hover:text-qz-text mb-6 inline-block transition-colors">
         ← Back to set
       </Link>
@@ -240,8 +243,10 @@ export default function EditSetPage() {
             {standalone.length > 0 && <div className="border-t border-qz-border my-2" />}
             <p className="text-xs font-semibold text-qz-secondary uppercase tracking-wide px-1 mb-1">Verbs &amp; Conjugations</p>
             {groups.map(({ verb, conjugations }) => {
-              const enabledCount = conjugations.filter(c => c.enabled !== false).length
-              const allEnabled = enabledCount === conjugations.length
+              const verbEnabled = verb.enabled !== false
+              const enabledCount = (verbEnabled ? 1 : 0) + conjugations.filter(c => c.enabled !== false).length
+              const total = 1 + conjugations.length
+              const allEnabled = enabledCount === total
               const noneEnabled = enabledCount === 0
               const isExpanded = expandedGroups.has(verb.id)
 
@@ -271,7 +276,7 @@ export default function EditSetPage() {
                           ? 'bg-qz-blue-light text-qz-blue'
                           : 'bg-yellow-50 text-yellow-700'
                     }`}>
-                      {enabledCount}/{conjugations.length} on
+                      {enabledCount}/{total} on
                     </span>
 
                     {/* Toggle all button */}
@@ -283,16 +288,13 @@ export default function EditSetPage() {
                     </button>
                   </div>
 
-                  {/* Conjugation cards (collapsible) */}
+                  {/* Verb card + conjugation children (collapsible) */}
                   {isExpanded && (
                     <div className="px-4 divide-y divide-qz-border">
-                      {conjugations.length === 0 ? (
-                        <p className="text-sm text-qz-secondary py-3">No conjugation cards yet.</p>
-                      ) : (
-                        conjugations.map(card => (
-                          <CardEditor key={card.id} card={card} onSave={handleSaveCard} onDelete={handleDeleteCard} />
-                        ))
-                      )}
+                      <CardEditor key={verb.id} card={verb} onSave={handleSaveCard} onDelete={handleDeleteCard} />
+                      {conjugations.map(card => (
+                        <CardEditor key={card.id} card={card} onSave={handleSaveCard} onDelete={handleDeleteCard} />
+                      ))}
                     </div>
                   )}
                 </div>
@@ -371,5 +373,6 @@ export default function EditSetPage() {
         Delete this set
       </button>
     </div>
+    </>
   )
 }
