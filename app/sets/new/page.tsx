@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import AppNav from '@/components/AppNav'
 
 export default function NewSetPage() {
   const router = useRouter()
@@ -30,7 +31,9 @@ export default function NewSetPage() {
   const inputCls = "w-full border-2 border-qz-border rounded-xl px-3 py-2.5 text-qz-text text-sm placeholder:text-qz-secondary focus:outline-none focus:border-qz-blue transition-colors bg-white"
 
   return (
-    <div className="max-w-xl mx-auto px-4 py-8">
+    <>
+    <AppNav />
+    <div className="max-w-4xl mx-auto px-4 py-8">
       <Link href="/home" className="text-sm text-qz-secondary hover:text-qz-text mb-6 inline-block transition-colors">
         ← Cancel
       </Link>
@@ -66,5 +69,6 @@ export default function NewSetPage() {
         </button>
       </form>
     </div>
+    </>
   )
 }

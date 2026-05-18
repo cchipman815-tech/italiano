@@ -104,7 +104,7 @@ export default function TranslatorWidget() {
     ? 'Type an English word or phrase…'
     : 'Type an Italian word or phrase…'
 
-  const inputCls = 'flex-1 border-2 border-[#c5caff] rounded-xl px-3 py-2.5 text-qz-text text-sm placeholder:text-qz-secondary focus:outline-none focus:border-qz-blue transition-colors bg-white min-w-0'
+  const inputCls = 'w-full border-2 border-[#c5caff] rounded-xl px-3 py-2.5 text-qz-text text-sm placeholder:text-qz-secondary focus:outline-none focus:border-qz-blue transition-colors bg-white'
 
   return (
     <div className="rounded-2xl p-5 mb-6" style={{ background: '#eef0ff', border: '1px solid #d5d9ff' }}>

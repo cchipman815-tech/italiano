@@ -10,11 +10,14 @@ export default function SetCard({ set }: Props) {
   const progress = calculateProgress(set.known_cards, set.total_cards)
 
   return (
-    <div className="bg-white rounded-2xl border-2 border-qz-border p-5 flex flex-col gap-3 hover:border-qz-blue transition-colors cursor-default">
-      <div>
+    <div className="bg-white rounded-2xl border-2 border-qz-border p-5 flex flex-col hover:border-qz-blue transition-colors cursor-default">
+      <div className="flex items-start justify-between mb-4">
         <h2 className="font-semibold text-qz-text">{set.title}</h2>
+        <span className="text-sm font-semibold text-qz-blue bg-qz-blue-light px-2.5 py-1 rounded-full shrink-0 ml-2">
+          {progress}%
+        </span>
       </div>
-      <div className="w-full bg-qz-subtle rounded-full h-1.5">
+      <div className="w-full bg-qz-subtle rounded-full h-1.5 mb-4">
         <div
           className="bg-qz-blue h-1.5 rounded-full transition-all"
           style={{ width: `${progress}%` }}
