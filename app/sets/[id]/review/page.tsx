@@ -39,7 +39,7 @@ export default async function ReviewPage({
 
   if (dueCards.length === 0) {
     return (
-      <div className="max-w-xl mx-auto px-4 py-16 text-center">
+      <div className="max-w-4xl mx-auto px-4 py-16 text-center">
         <div className="text-5xl mb-4">🎉</div>
         <h2 className="text-xl font-bold text-qz-text mb-2">All caught up!</h2>
         <p className="text-qz-secondary mb-6">No cards due for review today.</p>
@@ -54,13 +54,13 @@ export default async function ReviewPage({
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6">
-      <div className="flex items-center justify-between mb-2">
-        <Link href={`/sets/${id}`} className="text-sm text-qz-secondary hover:text-qz-text transition-colors">
-          ← {data.title}
-        </Link>
-        <span className="text-sm font-medium text-qz-text">Review</span>
-      </div>
+    <div className="max-w-4xl mx-auto px-4 py-6">
+      <nav className="text-sm text-qz-secondary mb-4">
+        <Link href="/home" className="hover:text-qz-text transition-colors">Sets</Link>
+        <span className="mx-1.5">›</span>
+        <Link href={`/sets/${id}`} className="hover:text-qz-text transition-colors">{data.title}</Link>
+      </nav>
+      <h1 className="text-2xl font-bold text-qz-text mb-4">Review Due Cards</h1>
       <ReviewStudy setId={id} cards={dueCards} />
     </div>
   )

@@ -45,21 +45,23 @@ export default async function SetDetailPage({
   }).length
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
-      <Link href="/home" className="text-sm text-qz-secondary hover:text-qz-text mb-6 inline-flex items-center gap-1 transition-colors">
-        ← Back to sets
-      </Link>
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      {/* Breadcrumb */}
+      <nav className="text-sm text-qz-secondary mb-6">
+        <Link href="/home" className="hover:text-qz-text transition-colors">Sets</Link>
+        <span className="mx-1.5">›</span>
+        <span className="text-qz-text font-medium">{set.title}</span>
+      </nav>
 
-      <div className="bg-white rounded-2xl border-2 border-qz-border p-6 mb-6" style={{ boxShadow: 'var(--qz-shadow-card)' }}>
-        <h1 className="text-2xl font-bold text-qz-text mb-1">{set.title}</h1>
-        {set.description && <p className="text-qz-secondary mb-4">{set.description}</p>}
-        <div className="flex items-center gap-4 text-sm text-qz-secondary">
-          <span>{totalCards} terms</span>
-          <span>{progress}% known</span>
-        </div>
-        <div className="w-full bg-qz-subtle rounded-full h-1.5 mt-3">
-          <div className="bg-qz-blue h-1.5 rounded-full" style={{ width: `${progress}%` }} />
-        </div>
+      {/* Title */}
+      <h1 className="text-2xl font-bold text-qz-text mb-1">{set.title}</h1>
+      {set.description && <p className="text-qz-secondary mb-3">{set.description}</p>}
+      <div className="flex items-center gap-4 text-sm text-qz-secondary mb-3">
+        <span>{totalCards} terms</span>
+        <span>{progress}% known</span>
+      </div>
+      <div className="w-full bg-qz-subtle rounded-full h-1.5 mb-5">
+        <div className="bg-qz-blue h-1.5 rounded-full" style={{ width: `${progress}%` }} />
       </div>
 
       <StudyModePicker setId={id} canStudyMulti={canStudyMulti} dueCount={dueCount} hasConjugations={hasConjugations} />
