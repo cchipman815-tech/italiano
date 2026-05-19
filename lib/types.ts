@@ -74,3 +74,10 @@ export interface SetWithCards extends Set {
   cards: Card[]
   progress: Progress[]
 }
+
+export interface SavedTranslation {
+  id: string
+  english: string
+  italian: string
+  created_at: string
+}

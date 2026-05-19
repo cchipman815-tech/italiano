@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import SetCard from '@/components/SetCard'
 import AppNav from '@/components/AppNav'
 import TranslatorWidget from '@/components/TranslatorWidget'
+import SavedTranslationsCard from '@/components/SavedTranslationsCard'
 import { isValidUserId, getUserById } from '@/lib/users'
 import type { SetWithProgress } from '@/lib/types'
 
@@ -16,6 +17,16 @@ async function getSets(userId: number): Promise<SetWithProgress[]> {
   return res.json()
 }
 
+async function getSavedCount(userId: number): Promise<number> {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/saved-translations`, {
+    headers: { Cookie: `userId=${userId}` },
+    cache: 'no-store',
+  })
+  if (!res.ok) return 0
+  const data = await res.json() as Array<unknown>
+  return data.length
+}
+
 export default async function HomePage() {
   const cookieStore = await cookies()
   const raw = cookieStore.get('userId')?.value
@@ -23,7 +34,7 @@ export default async function HomePage() {
   if (!userId || !isValidUserId(userId)) redirect('/login')
 
   const user = getUserById(userId)
-  const sets = await getSets(userId)
+  const [sets, savedCount] = await Promise.all([getSets(userId), getSavedCount(userId)])
 
   return (
     <>
@@ -42,6 +53,7 @@ export default async function HomePage() {
             <span className="text-3xl">+</span>
             <span>New Set</span>
           </Link>
+          <SavedTranslationsCard count={savedCount} />
         </div>
       </div>
     </>

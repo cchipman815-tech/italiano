@@ -31,16 +31,34 @@ export default function TranslatorWidget() {
   const [result,    setResult]    = useState<TranslateResult | null>(null)
   const [loading,   setLoading]   = useState(false)
   const [error,     setError]     = useState('')
+  const [saved,     setSaved]     = useState(false)
 
   function clearInput() {
     setInput('')
     setResult(null)
     setError('')
+    setSaved(false)
   }
 
   function handleDirectionChange(dir: 'en-it' | 'it-en') {
     setDirection(dir)
     clearInput()
+  }
+
+  async function saveTranslation(english: string, italian: string) {
+    try {
+      const res = await fetch('/api/saved-translations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ english, italian }),
+      })
+      if (res.ok) {
+        setSaved(true)
+        setTimeout(() => setSaved(false), 2000)
+      }
+    } catch {
+      // silent failure — do not surface save errors to the user
+    }
   }
 
   async function handleTranslate() {
@@ -49,6 +67,7 @@ export default function TranslatorWidget() {
     setLoading(true)
     setError('')
     setResult(null)
+    setSaved(false)
     try {
       if (direction === 'it-en') {
         const res = await fetch('/api/translate', {
@@ -62,7 +81,9 @@ export default function TranslatorWidget() {
         }
         const data = await res.json() as { english?: string; error?: string }
         if (data.error) throw new Error(String(data.error))
-        setResult({ type: 'it-en', italian: trimmed, english: String(data.english ?? '') })
+        const english = String(data.english ?? '')
+        setResult({ type: 'it-en', italian: trimmed, english })
+        void saveTranslation(english, trimmed)
       } else {
         const mode = trimmed.includes(' ') ? 'sentence' : 'word'
         const res = await fetch('/api/translate', {
@@ -77,20 +98,24 @@ export default function TranslatorWidget() {
         const data = await res.json() as Record<string, unknown>
         if (data.error) throw new Error(String(data.error))
         if (mode === 'word') {
+          const italian = String(data.italian ?? '')
           setResult({
             type: 'word',
-            italian:     String(data.italian     ?? ''),
+            italian,
             article:     String(data.article     ?? ''),
             gender:      data.gender === 'f' ? 'f' : 'm',
             plural:      String(data.plural      ?? ''),
             grammarNote: String(data.grammarNote ?? ''),
           })
+          void saveTranslation(trimmed, italian)
         } else {
+          const italian = String(data.italian ?? '')
           setResult({
             type: 'sentence',
-            italian:     String(data.italian     ?? ''),
+            italian,
             literalNote: String(data.literalNote ?? ''),
           })
+          void saveTranslation(trimmed, italian)
         }
       }
     } catch (err) {
@@ -134,7 +159,7 @@ export default function TranslatorWidget() {
         <div className="relative flex-1 min-w-0">
           <input
             value={input}
-            onChange={e => { setInput(e.target.value); setResult(null); setError('') }}
+            onChange={e => { setInput(e.target.value); setResult(null); setError(''); setSaved(false) }}
             onKeyDown={e => e.key === 'Enter' && !loading && handleTranslate()}
             placeholder={placeholder}
             className={inputCls}
@@ -162,6 +187,9 @@ export default function TranslatorWidget() {
 
       {result && (
         <div className="mt-4 bg-white border border-[#d5d9ff] rounded-xl p-4">
+          {saved && (
+            <p className="text-xs text-green-600 font-medium mb-2">Saved ✓</p>
+          )}
           {result.type === 'it-en' ? (
             <>
               <div className="flex items-center gap-2 mb-1">
