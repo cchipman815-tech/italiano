@@ -28,7 +28,7 @@ export default async function SavedPage() {
     <>
       <AppNav userInitial={user.name[0]} />
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <nav className="text-sm text-qz-secondary mb-6">
+        <nav aria-label="Breadcrumb" className="text-sm text-qz-secondary mb-6">
           <Link href="/home" className="hover:text-qz-text transition-colors">Home</Link>
           <span className="mx-1.5">›</span>
           <span className="text-qz-text font-medium">Saved Translations</span>
