@@ -27,6 +27,9 @@ export async function POST(request: NextRequest) {
   if (!english || !italian) {
     return NextResponse.json({ error: 'Missing english or italian' }, { status: 400 })
   }
+  if (english.length > 1000 || italian.length > 1000) {
+    return NextResponse.json({ error: 'Text too long' }, { status: 400 })
+  }
 
   const db = createServerClient()
   const { data, error } = await db

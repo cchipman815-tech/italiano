@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
-import { getUserIdFromCookie, unauthorized } from '@/lib/api-helpers'
+import { getUserIdFromCookie, unauthorized, notFound } from '@/lib/api-helpers'
 
 export async function DELETE(
   _request: Request,
@@ -11,8 +11,13 @@ export async function DELETE(
 
   const { id } = await params
   const db = createServerClient()
-  const { error } = await db.from('saved_translations').delete().eq('id', id)
+  const { data, error } = await db
+    .from('saved_translations')
+    .delete()
+    .eq('id', id)
+    .select()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (!data || data.length === 0) return notFound()
   return new NextResponse(null, { status: 204 })
 }
