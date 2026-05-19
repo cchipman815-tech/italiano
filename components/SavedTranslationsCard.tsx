@@ -8,7 +8,7 @@ export default function SavedTranslationsCard({ count }: Props) {
   return (
     <Link
       href="/saved"
-      className="bg-white rounded-2xl border-2 border-qz-border p-5 flex flex-col hover:border-qz-blue transition-colors"
+      className="bg-white rounded-2xl border-2 border-qz-border p-5 flex items-center hover:border-qz-blue transition-colors min-h-[160px]"
       style={{ boxShadow: 'var(--qz-shadow-card)' }}
     >
       <div className="flex items-center gap-3">

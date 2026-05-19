@@ -159,7 +159,7 @@ export default function TranslatorWidget() {
         <div className="relative flex-1 min-w-0">
           <input
             value={input}
-            onChange={e => { setInput(e.target.value); setResult(null); setError('') }}
+            onChange={e => { setInput(e.target.value); setResult(null); setError(''); setSaved(false) }}
             onKeyDown={e => e.key === 'Enter' && !loading && handleTranslate()}
             placeholder={placeholder}
             className={inputCls}
