@@ -14,6 +14,7 @@ import {
 import { usePathname, useRouter } from 'next/navigation'
 import { setPref, type PrefKey, type PrefValue, type Prefs } from '@/lib/prefs'
 import { showsTabBar, tabForPath, type NavDirection } from '@/lib/nav'
+import { TZ_COOKIE } from '@/lib/time'
 import type { Bilingual } from '@/lib/paths'
 import TabBar from './TabBar'
 import UndoBar from './UndoBar'
@@ -110,6 +111,14 @@ export default function Shell({
     }))
     transition.finished.finally(() => { delete root.dataset.nav })
   }, [router])
+
+  // ── time zone: Oggi's greeting and date are worded in the browser's zone ──
+  useEffect(() => {
+    const zone = Intl.DateTimeFormat().resolvedOptions().timeZone
+    if (zone && !document.cookie.includes(`${TZ_COOKIE}=${encodeURIComponent(zone)}`)) {
+      document.cookie = `${TZ_COOKIE}=${encodeURIComponent(zone)}; path=/; max-age=31536000; SameSite=Lax`
+    }
+  }, [])
 
   // ── install prompt (taken over from AppNav) ──
   useEffect(() => {

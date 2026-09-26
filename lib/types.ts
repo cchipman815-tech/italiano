@@ -84,6 +84,8 @@ export interface ConjugationProgress {
 export interface SetWithProgress extends Set {
   total_cards: number
   known_cards: number
+  due_cards?: number
+  new_cards?: number
 }
 
 export interface SetWithCards extends Set {
