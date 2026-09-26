@@ -5,6 +5,8 @@
  */
 import { PATHS, getPathByCategory, type PathSlug } from './paths'
 import { countDueAndNew } from './srs'
+import { activeForms } from './forms'
+import type { Conjugations, Pronoun } from './types'
 
 export interface RawSet {
   id: string
@@ -21,7 +23,7 @@ export interface RawCard {
   article: string | null
   chapter: number | null
   enabled: boolean | null
-  conjugations: { present?: unknown } | null
+  conjugations: Conjugations | null
   sort_order: number
 }
 
@@ -34,6 +36,7 @@ export interface RawProgress {
 
 export interface RawFormProgress {
   card_id: string
+  pronoun: Pronoun
   next_review_at: string | null
 }
 
@@ -46,7 +49,7 @@ export interface TopicStats {
   total: number
   /** Enabled cards: what study modes use. */
   active: number
-  /** Enabled cards with present-tense conjugations. */
+  /** Enabled cards with at least one present-tense form switched on. */
   conjugable: number
   /** Enabled cards marked known. */
   known: number
@@ -106,6 +109,9 @@ export function buildOverview(
     list.push(card)
     cardsBySet.set(card.set_id, list)
   }
+  // Forms switched off in Modifica argomento (or no longer on the verb) don't count.
+  const studied = new Map(cards.map(c => [c.id, new Set(activeForms(c.conjugations))]))
+  forms = forms.filter(f => studied.get(f.card_id)?.has(f.pronoun))
   const formsByCard = new Map<string, RawFormProgress[]>()
   for (const f of forms) formsByCard.set(f.card_id, [...(formsByCard.get(f.card_id) ?? []), f])
 
@@ -131,7 +137,7 @@ export function buildOverview(
         category: set.category,
         total: all.length,
         active: enabled.length,
-        conjugable: enabled.filter(c => c.conjugations?.present != null).length,
+        conjugable: enabled.filter(c => activeForms(c.conjugations).length > 0).length,
         known: enabled.filter(c => progressByCard.get(c.id)?.known).length,
         due,
         new: fresh,

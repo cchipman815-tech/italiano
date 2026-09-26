@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
-import { getUserIdFromCookie, unauthorized } from '@/lib/api-helpers'
+import { getUserIdFromCookie, unauthorized, notFound } from '@/lib/api-helpers'
+import { parseConjugations } from '@/lib/cards'
+import { snapshotCards } from '@/lib/snapshots'
+import type { Card } from '@/lib/types'
 
 export async function PUT(
   request: Request,
@@ -27,7 +30,11 @@ export async function PUT(
   const update: Record<string, unknown> = {}
   if (body.italian          !== undefined) update.italian          = body.italian
   if (body.english          !== undefined) update.english          = body.english
-  if (body.conjugations     !== undefined) update.conjugations     = body.conjugations
+  if (body.conjugations     !== undefined) {
+    const conjugations = parseConjugations(body.conjugations)
+    if (conjugations === undefined) return NextResponse.json({ error: 'Bad conjugations' }, { status: 400 })
+    update.conjugations = conjugations
+  }
   if (body.enabled          !== undefined) update.enabled          = body.enabled
   if (body.plural           !== undefined) update.plural           = body.plural
   if (body.example          !== undefined) update.example          = body.example
@@ -49,6 +56,7 @@ export async function PUT(
   return NextResponse.json(data)
 }
 
+/** Deletes a card; answers with a snapshot (both users' progress too) so Annulla can put it back. */
 export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -58,8 +66,14 @@ export async function DELETE(
 
   const { id } = await params
   const db = createServerClient()
-  const { error } = await db.from('cards').delete().eq('id', id)
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 })
-  return new NextResponse(null, { status: 204 })
+  const { data: card } = await db.from('cards').select('*').eq('id', id).maybeSingle()
+  if (!card) return notFound()
+  try {
+    const [snapshot] = await snapshotCards(db, [card as Card])
+    const { error } = await db.from('cards').delete().eq('id', id)
+    if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+    return NextResponse.json(snapshot)
+  } catch (err) {
+    return NextResponse.json({ error: err instanceof Error ? err.message : 'Failed to delete' }, { status: 500 })
+  }
 }

@@ -30,7 +30,7 @@ const SET_DETAIL = /^\/sets\/[^/]+$/
 export function tabForPath(pathname: string): TabKey | null {
   if (pathname === '/home') return 'oggi'
   if (pathname === '/learn' || pathname.startsWith('/learn/')) return 'impara'
-  if (SET_DETAIL.test(pathname) && pathname !== '/sets/new') return 'impara'
+  if (SET_DETAIL.test(pathname)) return 'impara'
   if (pathname === '/translate') return 'traduci'
   if (pathname === '/saved') return 'salvate'
   return null

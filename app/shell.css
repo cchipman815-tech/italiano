@@ -166,6 +166,14 @@ html[data-nav="back"]::view-transition-new(root) { animation: vt-enter-left var(
 @keyframes vt-fade-in  { from { opacity: 0; } }
 @keyframes vt-fade-out { to   { opacity: 0; } }
 
+/* Chi studia? ↔ Oggi are the only full-page loads (switching user, signing
+   out). Where browsers carry view transitions across documents, they
+   cross-fade slowly: a change of who, not a step deeper (large · standard).
+   Same-document transitions always set data-nav, so these don't touch them. */
+@view-transition { navigation: auto; }
+html:not([data-nav])::view-transition-old(root), html:not([data-nav])::view-transition-old(tabbar) { display: block; animation: vt-fade-out var(--d-large) var(--e-standard) both; }
+html:not([data-nav])::view-transition-new(root), html:not([data-nav])::view-transition-new(tabbar) { animation: vt-fade-in var(--d-large) var(--e-standard) both; }
+
 /* The tab bar is not part of the page: it stays put and its pill slides live. */
 ::view-transition-group(tabbar) { animation: none; }
 ::view-transition-old(tabbar) { display: none; }

@@ -5,6 +5,9 @@
  */
 import type { Bilingual } from './paths'
 import type { Card, ConjugationForms, Pronoun } from './types'
+import { PRONOUNS, activeForms } from './forms'
+
+export { PRONOUNS, activeForms }
 import { withArticle } from './overview'
 import { selectDistractors } from './quiz'
 import { shuffleArray } from './utils'
@@ -108,8 +111,6 @@ function shuffleEnglish(n: number): number[] {
 
 /* ─── Coniugazioni ──────────────────────────────────────────────────────────── */
 
-export const PRONOUNS: Pronoun[] = ['io', 'tu', 'lui/lei', 'noi', 'voi', 'loro']
-
 const PRONOUN_EN: Record<Pronoun, string> = {
   io: 'I',
   tu: 'you',
@@ -161,13 +162,14 @@ export interface ConjugationItem {
  * forms due today come first; the rest are shuffled.
  */
 export function buildConjugationDeck(cards: Card[], dueCardIds: ReadonlySet<string> = new Set()): ConjugationItem[] {
-  const verbs = shuffleArray(cards.filter(c => c.conjugations?.present))
+  const verbs = shuffleArray(cards.filter(c => activeForms(c.conjugations).length > 0))
   const ordered = [...verbs.filter(c => dueCardIds.has(c.id)), ...verbs.filter(c => !dueCardIds.has(c.id))]
   return ordered.flatMap(card => {
     const present = card.conjugations!.present as ConjugationForms
-    return PRONOUNS.filter(p => present[p]).map(pronoun => ({ card, pronoun, form: present[pronoun] }))
+    return activeForms(card.conjugations).map(pronoun => ({ card, pronoun, form: present[pronoun] }))
   })
 }
+
 
 /* ─── Ripasso ───────────────────────────────────────────────────────────────── */
 
@@ -190,7 +192,7 @@ export function reviewItems(
   for (const { card_id, pronoun } of dueForms) {
     const card = enabled.get(card_id)
     const form = card?.conjugations?.present?.[pronoun]
-    if (card && form) items.push({ kind: 'form', card, pronoun, form })
+    if (card && form && activeForms(card.conjugations).includes(pronoun)) items.push({ kind: 'form', card, pronoun, form })
   }
   return items
 }

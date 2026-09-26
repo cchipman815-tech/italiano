@@ -30,6 +30,8 @@ export interface UndoRequest {
   /** Defaults to Annulla · Undo. */
   action?: Bilingual
   onAction?: () => void
+  /** The screen the bar belongs to, when it's raised just before navigating there. Defaults to the current one. */
+  path?: string
 }
 
 interface BeforeInstallPromptEvent extends Event {
@@ -151,7 +153,7 @@ export default function Shell({
 
   // The undo bar belongs to the screen it was raised on: navigating away hides it.
   const showUndo = useCallback((request: UndoRequest) => {
-    setUndo({ request, path: pathname, open: true })
+    setUndo({ request, path: request.path ?? pathname, open: true })
   }, [pathname])
   const dismissUndo = useCallback(() => {
     setUndo(u => (u ? { ...u, open: false } : u))

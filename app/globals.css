@@ -2,6 +2,7 @@
 @import "./shell.css";
 @import "./screens.css";
 @import "./study.css";
+@import "./edit.css";
 
 /* ═══ Notte design tokens ═══════════════════════════════════════════════════
    Ported from docs/design/notte-prototype.html (the `.nm{…}` and

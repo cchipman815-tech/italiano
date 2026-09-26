@@ -3,6 +3,8 @@ import { notFound, redirect } from 'next/navigation'
 import SubpageBar from '@/components/SubpageBar'
 import PathTopics from '@/components/PathTopics'
 import NavLink from '@/components/NavLink'
+import NewTopicSheet from '@/components/NewTopicSheet'
+import { CHAPTER_MAX } from '@/lib/cards'
 import Bi from '@/components/Bi'
 import { Icon } from '@/components/StudyIcons'
 import { isValidUserId } from '@/lib/users'
@@ -50,12 +52,7 @@ export default async function PathPage({
 
       <PathTopics path={path.slug} topics={topics} initialTopic={topic} />
 
-      <div className="nm-list" style={{ marginTop: 10 }}>
-        <NavLink href={`/sets/new?category=${path.category}`} className="nm-row add">
-          <span className="duo"><Icon name="plus" /></span>
-          <span className="t"><b><Bi k="newTopic" /></b></span>
-        </NavLink>
-      </div>
+      <NewTopicSheet path={path.slug} chapters={chapterChoices(overview.chapters)} />
 
       <div className="nm-float-space" />
       <div className="nm-float">
@@ -66,4 +63,10 @@ export default async function PathPage({
       </div>
     </>
   )
+}
+
+/** Chapters with cards so far, plus the next one, for a new topic. */
+function chapterChoices(withCards: number[]): number[] {
+  const next = (withCards.at(-1) ?? 0) + 1
+  return next <= CHAPTER_MAX ? [...withCards, next] : withCards
 }

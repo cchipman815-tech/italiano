@@ -104,8 +104,62 @@ export const STRINGS = {
   cantRestore:    { it: 'Impossibile ripristinare', en: 'Unable to restore' },
   cantAdd:        { it: 'Impossibile aggiungere', en: 'Unable to add' },
 
+  // Modifica argomento
+  addCard:        { it: 'Aggiungi carta', en: 'Add card' },
+  addCardHint:    { it: "Scrivi in inglese: l'italiano arriva da solo", en: 'Type in English: the Italian fills itself in' },
+  noCards:        { it: 'Nessuna carta ancora', en: 'No cards yet' },
+  noCardsHint:    { it: "Aggiungi la prima qui sotto: scrivi in inglese e l'italiano arriva da solo.", en: 'Add the first one below: type it in English and the Italian fills itself in.' },
+  deleteTopic:    { it: 'Elimina argomento', en: 'Delete topic' },
+  deleteCardQ:    { it: 'Eliminare la carta?', en: 'Delete this card?' },
+  deleteCard:     { it: 'Elimina carta', en: 'Delete card' },
+  cardDeleted:    { it: 'Carta eliminata: ', en: 'Card deleted: ' },
+  topicDeleted:   { it: 'Argomento eliminato: ', en: 'Topic deleted: ' },
+  turnAllOn:      { it: 'Attiva tutte', en: 'Turn all on' },
+  addPlural:      { it: '+ plurale', en: '+ plural' },
+  addExample:     { it: '+ esempio', en: '+ example' },
+  generating:     { it: 'Genero…', en: 'Generating…' },
+  conjugate:      { it: 'Coniuga', en: 'Conjugate' },
+  conjugating:    { it: 'Coniugo…', en: 'Conjugating…' },
+  italian:        { it: 'Italiano', en: 'Italian' },
+  english:        { it: 'Inglese', en: 'English' },
+  article:        { it: 'Articolo', en: 'Article' },
+  chapter:        { it: 'Capitolo', en: 'Chapter' },
+  wordType:       { it: 'Tipo', en: 'Type' },
+  inReview:       { it: 'In ripasso', en: 'In review' },
+  formOn:         { it: 'Attiva', en: 'On' },
+  details:        { it: 'Dettagli', en: 'Details' },
+  cantSave:       { it: 'Impossibile salvare. Riprova.', en: 'Unable to save. Try again.' },
+  cantGenerate:   { it: 'Impossibile generare. Riprova.', en: 'Unable to generate. Try again.' },
+  cantConjugate:  { it: 'Impossibile coniugare. Riprova.', en: 'Unable to conjugate. Try again.' },
+
+  // Aggiungi carta
+  try:            { it: 'Prova', en: 'Try' },
+  looksLikeVerb:  { it: 'Sembra un verbo. Aggiungo anche le 6 forme del presente? Restano spente finché non le attivi.', en: 'Looks like a verb. Add the 6 present-tense forms too? They stay off until you turn them on.' },
+  addForms:       { it: 'Aggiungi coniugazioni', en: 'Add conjugations' },
+  typeWordEn:     { it: 'Scrivi la parola in inglese.', en: 'Type the word in English.' },
+  typeWordIt:     { it: 'Scrivi la parola in italiano, o tocca Traduci.', en: 'Type the Italian word, or tap Translate.' },
+  typeItYourself: { it: "Impossibile tradurre. Scrivi tu l'italiano.", en: 'Unable to translate. Type the Italian yourself.' },
+  cantAddCard:    { it: 'Impossibile aggiungere la carta. Riprova.', en: 'Unable to add the card. Try again.' },
+
+  // Nuovo argomento
+  newTopicHint:   { it: 'Un piccolo mazzo dentro un percorso', en: 'A small deck inside a path' },
+  name:           { it: 'Nome', en: 'Name' },
+  nameMissing:    { it: "Dai un nome all'argomento.", en: 'Give the topic a name.' },
+  chapterOptional:{ it: 'Capitolo di Prego (facoltativo)', en: 'Prego chapter (optional)' },
+  none:           { it: 'Nessuno', en: 'None' },
+  createTopic:    { it: 'Crea argomento', en: 'Create topic' },
+  cantCreate:     { it: "Impossibile creare l'argomento. Riprova.", en: 'Unable to create the topic. Try again.' },
+
+  // Chi studia?
+  loginNote:      { it: 'Nessuna password: il telefono è vostro. Puoi cambiare dal profilo.', en: "No password: it's your own phone. Switch anytime from your profile." },
+
   // states
   nothingDue:    { it: 'Niente da ripassare oggi', en: 'Nothing to review today' },
+  cantLoad:       { it: 'Impossibile caricare le carte', en: 'Unable to load your cards' },
+  cantLoadHint:   { it: 'Controlla la connessione e riprova. Le risposte di oggi sono salvate.', en: "Check your connection and try again. Today's answers are saved." },
+  notFound:       { it: 'Questa pagina non esiste', en: "This page doesn't exist" },
+  notFoundHint:   { it: 'Forse il link è vecchio. Le tue carte sono al sicuro.', en: 'The link may be old. Your cards are safe.' },
+  loading:        { it: 'Carico…', en: 'Loading…' },
   offline:        { it: 'Senza rete', en: 'Offline' },
   checkConnection:{ it: 'Controlla la connessione e riprova.', en: 'Check your connection and try again.' },
 } as const satisfies Record<string, Bilingual>

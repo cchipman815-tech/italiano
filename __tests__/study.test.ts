@@ -133,6 +133,13 @@ describe('buildConjugationDeck', () => {
     expect(deck.find(i => i.card.id === 'parlare' && i.pronoun === 'noi')?.form).toBe('parliamo')
   })
 
+  it('leaves out forms switched off, and verbs with every form off', () => {
+    const someOff = card('parlare', { conjugations: { present: PARLARE, off: ['noi', 'voi', 'loro'] } })
+    const allOff = card('finire', { conjugations: { present: FINIRE, off: ['io', 'tu', 'lui/lei', 'noi', 'voi', 'loro'] } })
+    const deck = buildConjugationDeck([someOff, allOff])
+    expect(deck.map(i => i.pronoun)).toEqual(['io', 'tu', 'lui/lei'])
+  })
+
   it('puts verbs with forms due today first', () => {
     for (let i = 0; i < 20; i++) {
       expect(buildConjugationDeck([parlare, finire], new Set(['finire']))[0].card.id).toBe('finire')
@@ -155,5 +162,10 @@ describe('reviewItems', () => {
       { kind: 'card', card: casa },
       { kind: 'form', card: parlare, pronoun: 'noi', form: 'parliamo' },
     ])
+  })
+
+  it('drops a due form that was switched off', () => {
+    const off = card('parlare', { conjugations: { present: PARLARE, off: ['noi'] } })
+    expect(reviewItems([off], new Set(), [{ card_id: 'parlare', pronoun: 'noi' }])).toEqual([])
   })
 })

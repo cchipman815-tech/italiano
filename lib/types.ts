@@ -16,6 +16,8 @@ export interface Conjugations {
   present?: ConjugationForms
   past?: ConjugationForms
   future?: ConjugationForms
+  /** Present-tense forms switched off in Modifica argomento; they stay out of study. Absent means all on. */
+  off?: Pronoun[]
 }
 
 export interface ConjugationForms {

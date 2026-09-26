@@ -1,7 +1,13 @@
 import { NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
-import { getUserIdFromCookie, unauthorized } from '@/lib/api-helpers'
+import { getUserIdFromCookie, unauthorized, notFound } from '@/lib/api-helpers'
+import { parseNewCard } from '@/lib/cards'
 
+/**
+ * Aggiungi carta: a card at the end of the topic. Italian and English are
+ * required; article, gender, plural, word type, chapter, on/off and the six
+ * present-tense forms are optional (see lib/cards.ts).
+ */
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -10,10 +16,12 @@ export async function POST(
   if (!userId) return unauthorized()
 
   const { id: setId } = await params
-  const body = await request.json()
-  const { italian, english } = body
+  const parsed = parseNewCard(await request.json().catch(() => null))
+  if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 })
 
   const db = createServerClient()
+  const { data: set } = await db.from('sets').select('id').eq('id', setId).maybeSingle()
+  if (!set) return notFound()
 
   const { data: existing } = await db
     .from('cards')
@@ -27,7 +35,7 @@ export async function POST(
 
   const { data, error } = await db
     .from('cards')
-    .insert({ set_id: setId, italian, english, sort_order: sortOrder })
+    .insert({ ...parsed.value, set_id: setId, sort_order: sortOrder })
     .select()
     .single()
 

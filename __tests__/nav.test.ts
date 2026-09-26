@@ -24,7 +24,7 @@ describe('tabForPath', () => {
     expect(tabForPath(path)).toBe(tab)
   })
 
-  it.each(['/login', '/sets/new', '/sets/abc/quiz', '/sets/abc/edit', '/review', '/'])('%s has no tab', path => {
+  it.each(['/login', '/sets/abc/quiz', '/sets/abc/edit', '/review', '/'])('%s has no tab', path => {
     expect(tabForPath(path)).toBeNull()
   })
 })

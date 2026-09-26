@@ -9,6 +9,9 @@ const sets: RawSet[] = [
   { id: 'old', title: 'Chapter 9', description: null, category: 'general', sort_order: 99 },
 ]
 
+const PARLARE = { io: 'parlo', tu: 'parli', 'lui/lei': 'parla', noi: 'parliamo', voi: 'parlate', loro: 'parlano' }
+const PAGARE = { io: 'pago', tu: 'paghi', 'lui/lei': 'paga', noi: 'paghiamo', voi: 'pagate', loro: 'pagano' }
+
 function card(id: string, set_id: string, extra: Partial<RawCard> = {}): RawCard {
   return { id, set_id, italian: id, article: null, chapter: 1, enabled: true, conjugations: null, sort_order: 0, ...extra }
 }
@@ -18,8 +21,9 @@ const cards: RawCard[] = [
   card('università', 'citta', { article: "l'", sort_order: 2 }),
   card('museo', 'citta', { article: 'il', sort_order: 3, chapter: 2 }),
   card('teatro', 'citta', { article: 'il', sort_order: 4, enabled: false }),
-  card('parlare', 'are', { conjugations: { present: {} }, chapter: 3 }),
-  card('pagare', 'are', { conjugations: { present: {} }, chapter: 5 }),
+  card('parlare', 'are', { conjugations: { present: PARLARE, off: ['voi'] }, chapter: 3 }),
+  card('pagare', 'are', { conjugations: { present: PAGARE }, chapter: 5 }),
+  card('capire', 'are', { conjugations: { present: PAGARE, off: ['io', 'tu', 'lui/lei', 'noi', 'voi', 'loro'] }, chapter: 5, enabled: true }),
 ]
 
 const progress = [
@@ -30,8 +34,10 @@ const progress = [
 ]
 
 const forms = [
-  { card_id: 'parlare', next_review_at: '2026-09-26' },
-  { card_id: 'parlare', next_review_at: '2026-09-27' },
+  { card_id: 'parlare', pronoun: 'io' as const, next_review_at: '2026-09-26' },
+  { card_id: 'parlare', pronoun: 'tu' as const, next_review_at: '2026-09-27' },
+  // Switched off in Modifica argomento: not counted.
+  { card_id: 'parlare', pronoun: 'voi' as const, next_review_at: '2026-09-20' },
 ]
 
 const overview = buildOverview(sets, cards, progress, forms, TODAY)
@@ -53,13 +59,14 @@ describe('buildOverview', () => {
     expect(citta.chapters).toEqual({ 1: 2, 2: 1 })
   })
 
-  it('adds due conjugation forms to the verb topic', () => {
-    expect(topic('are')).toMatchObject({ active: 2, conjugable: 2, due: 1, new: 1 })
+  it('adds due conjugation forms to the verb topic, skipping forms switched off', () => {
+    // capire has every form off, so it's not conjugable; parlare's voi is due but off.
+    expect(topic('are')).toMatchObject({ active: 3, conjugable: 2, due: 1, new: 2 })
   })
 
   it('totals due and new across topics, ignoring disabled cards', () => {
     expect(overview.due).toBe(2)
-    expect(overview.new).toBe(2)
+    expect(overview.new).toBe(3)
   })
 
   it('rolls topics up into their paths', () => {

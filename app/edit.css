@@ -1,0 +1,147 @@
+/* ═══ Editing, forms, Chi studia? and states ═════════════════════════════════
+   Modifica argomento, the Aggiungi carta and Nuovo argomento sheets, login,
+   and the loading / error / not-found screens. Values copied from
+   docs/design/notte-prototype.html. */
+
+/* ─── Form pieces (sheets) ─────────────────────────────────────────────────── */
+.p-sheet .frm { display: grid; gap: 14px; align-content: start; padding-top: 4px; }
+.fld { display: grid; gap: 6px; }
+.fld .lb, .fld > label { font-size: 13px; font-weight: 500; color: var(--ink2); }
+.nm-in[aria-invalid="true"] { box-shadow: inset 0 0 0 1.5px var(--no); }
+.nm-err svg { flex: none; }
+
+.pick4 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.pick4 button { min-height: 44px; border: 0; border-radius: 12px; background: var(--wash); box-shadow: inset 0 0 0 1px var(--hl); color: var(--ink2); font: inherit; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; padding: 0 12px; text-align: start; transition: scale var(--d-micro) var(--e-standard), background-color var(--d-micro) var(--e-standard), color var(--d-micro) var(--e-standard), box-shadow var(--d-micro) var(--e-standard); }
+.pick4 button:active { scale: .96; }
+.pick4 button svg { color: var(--ac-t); }
+.pick4 button[aria-pressed="true"] { background: rgba(var(--ac-rgb), .16); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ac-line); }
+.nm-caps.inline { padding: 0; flex-wrap: wrap; overflow: visible; }
+
+.ad-row { display: flex; gap: 6px; }
+.ad-row .nm-in { flex: 1; min-width: 0; }
+.mini { flex: none; min-height: 48px; padding: 0 14px; border: 0; border-radius: 14px; background: rgba(var(--ac-rgb), .16); color: var(--ac-t); font-weight: 600; font-size: 14px; transition: scale var(--d-micro) var(--e-standard); }
+.mini:active { scale: .96; }
+.mini:disabled { opacity: .7; }
+.ad-meta { display: flex; flex-wrap: wrap; gap: 6px; }
+.ad-verb { border-radius: 16px; background: var(--wash); box-shadow: inset 0 0 0 1px var(--hl); padding: 10px 12px; display: grid; gap: 4px; }
+.ad-verb p { font-size: 13px; color: var(--ink2); line-height: 1.4; margin: 0; }
+.tr-try { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.tr-try > span { font-size: 12px; color: var(--ink2); margin-right: 2px; }
+.tr-chip { position: relative; min-height: 36px; padding: 0 12px; border-radius: 99px; border: 0; background: var(--wash); box-shadow: inset 0 0 0 1px var(--hl); color: var(--ink); font-size: 13px; transition: scale var(--d-micro) var(--e-standard); }
+.tr-chip::after { content: ""; position: absolute; inset: -4px 0; }
+.tr-chip:active { scale: .96; }
+/* Something that just arrived fades in (Traduci's result does the same). */
+.fade-in { animation: fade-in var(--d-small) var(--e-decel); }
+@keyframes fade-in { from { opacity: 0; translate: 0 4px; } }
+
+.gch.sm { min-height: 20px; padding: 0 6px; border-radius: 6px; font-size: 11px; }
+.nm-ghost.danger { color: var(--no); }
+
+/* ─── Modifica argomento ───────────────────────────────────────────────────── */
+.ed-body { padding-bottom: calc(118px + env(safe-area-inset-bottom, 0px)); }
+.ed-list { margin: 14px 14px 0; border-radius: 18px; background: var(--surf); box-shadow: inset 0 0 0 1px var(--hl); overflow: hidden; }
+.ed-list:empty { display: none; }
+.ed-gh { padding: 18px 30px 0; font-size: 12px; color: var(--ink2); }
+.ed-gh + .ed-list { margin-top: 7px; }
+.ed-row { position: relative; }
+.ed-row + .ed-row::before { content: ""; position: absolute; top: 0; left: 62px; right: 0; height: 1px; background: var(--hl); z-index: 1; }
+.ed-row.new { animation: ed-new 1400ms var(--e-standard); }
+@keyframes ed-new { 0%, 30% { background: rgba(var(--ac-rgb), .2); } 100% { background: transparent; } }
+.ed-row.leaving { opacity: 0; transition: opacity var(--d-small) var(--e-accel); }
+.ed-main { display: flex; align-items: center; min-height: 62px; padding-left: 8px; }
+.ed-sw { width: 52px; height: 44px; flex: none; border: 0; background: none; padding: 0; display: grid; place-items: center; }
+.ed-sw .nm-sw2 { width: 40px; height: 24px; }
+.ed-sw .nm-sw2::after { width: 18px; height: 18px; }
+.ed-sw[aria-checked="true"] .nm-sw2 { background: var(--ac); }
+.ed-sw[aria-checked="true"] .nm-sw2::after { translate: 16px 0; }
+.ed-open { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; min-height: 62px; padding: 6px 4px 6px 4px; border: 0; background: none; color: inherit; font: inherit; text-align: start; transition: opacity var(--d-small) var(--e-standard); }
+.ed-open .t { flex: 1; min-width: 0; display: grid; gap: 1px; }
+.ed-open .t b { font-weight: 400; font-size: 17px; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; line-height: 1.2; overflow-wrap: anywhere; }
+.ed-open .t small { color: var(--ink2); font-size: 12.5px; overflow-wrap: anywhere; }
+.ed-open .pill { font-family: var(--font-sans); font-size: 11.5px; font-weight: 500; padding: 1px 8px; border-radius: 99px; background: var(--wash); box-shadow: inset 0 0 0 1px var(--hl); color: var(--ink2); }
+.ed-open .chev { flex: none; color: var(--ink2); rotate: 90deg; transition: rotate var(--d-medium) var(--e-standard); }
+.ed-row.open .ed-open .chev { rotate: -90deg; }
+.ed-row.off .ed-open { opacity: .5; }
+.ed-main .spk2 { margin-right: 8px; }
+/* Details open in place: the row's height animates through grid rows. */
+.ed-det { display: grid; grid-template-rows: 0fr; transition: grid-template-rows var(--d-medium) var(--e-standard); }
+.ed-row.open .ed-det { grid-template-rows: 1fr; }
+.ed-in { min-height: 0; overflow: hidden; }
+.ed-pad { padding: 0 14px 14px 60px; display: grid; gap: 10px; opacity: 0; transition: opacity var(--d-small) var(--e-standard); }
+.ed-row.open .ed-pad { opacity: 1; transition-delay: calc(var(--d-medium) * .3); }
+.ed-kv { display: flex; align-items: baseline; gap: 8px; font-size: 15px; }
+.ed-kv em, .ed-adj em, .ed-form em { font-style: normal; font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .05em; color: var(--ink2); }
+.ed-kv b { font-weight: 400; font-family: var(--font-serif); }
+.ed-ex { border-left: 2px solid var(--ac-line); padding-left: 10px; display: grid; gap: 1px; }
+.ed-ex i { font-family: var(--font-serif); font-size: 14.5px; }
+.ed-ex small { color: var(--ink2); font-size: 12.5px; }
+.ed-adj { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 14px; font-size: 14.5px; }
+.ed-adj span { display: flex; align-items: baseline; gap: 8px; }
+.ed-adj b { font-weight: 400; font-family: var(--font-serif); }
+.ed-gen { justify-self: start; min-height: 36px; padding: 0 12px; border-radius: 99px; border: 0; background: rgba(var(--ac-rgb), .12); color: var(--ac-t); font-size: 13px; font-weight: 500; transition: scale var(--d-micro) var(--e-standard), opacity var(--d-small) var(--e-standard); }
+.ed-gen:active { scale: .96; }
+.ed-gen:disabled { opacity: .7; }
+.ed-fields { display: flex; flex-wrap: wrap; gap: 6px; }
+.fl { display: grid; gap: 1px; padding: 6px 10px; border-radius: 10px; background: var(--wash); box-shadow: inset 0 0 0 1px var(--hl); font-size: 13.5px; min-width: 60px; }
+.fl em { font-style: normal; font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--ink2); }
+.ed-forms { display: grid; }
+.ed-form { display: flex; align-items: center; gap: 10px; min-height: 44px; }
+.ed-form em { width: 48px; }
+.ed-form span { flex: 1; font-family: var(--font-serif); font-size: 15.5px; }
+.ed-acts { display: flex; flex-wrap: wrap; gap: 6px; }
+.ed-a { min-height: 40px; padding: 0 12px; border-radius: 12px; border: 0; background: var(--wash); box-shadow: inset 0 0 0 1px var(--hl); color: var(--ink); font-size: 13.5px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; transition: scale var(--d-micro) var(--e-standard); }
+.ed-a:active { scale: .96; }
+.ed-a:disabled { opacity: .7; }
+.ed-a.del { color: var(--no); margin-left: auto; }
+.ed-a.pri { background: var(--ac); color: var(--on-ac); box-shadow: inset 0 0 0 1px var(--ac-edge); margin-left: auto; }
+.ed-a.solid { background: var(--no); color: var(--bg); box-shadow: none; }
+.ed-confirm { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 8px 8px 8px 12px; border-radius: 14px; background: rgba(var(--no-rgb), .1); box-shadow: inset 0 0 0 1px rgba(var(--no-rgb), .4); }
+.ed-confirm > span { flex: 1 1 120px; font-size: 13.5px; font-weight: 500; }
+.ed-edit { display: grid; gap: 8px; }
+.ed-edit, .ed-confirm { scroll-margin: 60px 0 calc(110px + env(safe-area-inset-bottom, 0px)); }
+.ed-edit .nm-in { min-height: 44px; font-size: 16px; }
+.ed-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.ed-grid .fld > label { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .05em; }
+.ed-danger { margin: 22px 14px 0; display: grid; gap: 8px; }
+.ed-danger .nm-ghost { width: 100%; }
+/* The sticky Aggiungi carta bar. */
+.ed-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 11; max-width: 560px; margin-inline: auto; padding: 10px 14px max(28px, calc(env(safe-area-inset-bottom, 0px) + 12px)); border-radius: 24px 24px 0 0; }
+
+/* ─── Chi studia? ──────────────────────────────────────────────────────────── */
+.lg { min-height: 100dvh; display: grid; align-content: center; justify-items: center; gap: 6px; padding: env(safe-area-inset-top, 0px) 20px 40px; text-align: center; max-width: 480px; margin-inline: auto; }
+.lg h1 { font-size: 42px; font-weight: 400; font-style: italic; letter-spacing: -.03em; line-height: 1; margin: 6px 0 0; }
+.lg > small { color: var(--ink2); font-size: 14px; }
+.lg-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin-top: 24px; }
+.lg-u { border: 0; border-radius: 24px; background: var(--surf); box-shadow: inset 0 0 0 1px var(--hl); padding: 18px 8px 16px; display: grid; justify-items: center; gap: 6px; color: var(--ink); font: inherit; transition: scale var(--d-micro) var(--e-standard); }
+.lg-u:active { scale: .96; }
+.lg-u .av { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; font-size: 24px; font-weight: 600; background: var(--wash2); box-shadow: var(--wash-sh), 0 0 0 1.5px rgba(var(--ac-rgb), .5); }
+.lg-u b { font-size: 17px; font-weight: 600; }
+.lg-u small { color: var(--ac-t); font-size: 12.5px; font-weight: 500; }
+.lg-u small.none { color: var(--ink2); }
+.lg-note { color: var(--ink2); font-size: 13px; max-width: 30ch; margin: 18px 0 0; line-height: 1.45; text-wrap: pretty; }
+
+/* ─── States ───────────────────────────────────────────────────────────────── */
+/* Loading: the shape of the page. It pulses once every 1.2s; still with reduced motion. */
+.skel { display: block; border-radius: 8px; background: var(--wash2); box-shadow: inset 0 0 0 1px var(--hl); animation: sk-pulse 1200ms var(--e-standard) infinite; }
+.sk-page { display: grid; gap: 12px; padding: 6px 18px; }
+.sk-row { display: flex; gap: 12px; align-items: flex-end; }
+.sk-two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.st-screen { min-height: 100dvh; display: flex; flex-direction: column; }
+.st-screen .nm-empty { padding-top: 90px; }
+.st-screen.nf .nm-empty { padding-top: calc(120px + env(safe-area-inset-top, 0px)); }
+/* Without a tab bar the one button sits above the home indicator. */
+.nm-float.low { bottom: max(34px, calc(env(safe-area-inset-bottom, 0px) + 12px)); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ed-det { transition: none; }
+  .ed-open .chev { transition: none; }
+  .ed-row.new { animation: none; }
+  .skel { animation: none; }
+  .fade-in { animation-name: fade-only; }
+}
+@keyframes fade-only { from { opacity: 0; } }
+
+/* On Modifica argomento the undo bar sits above the Aggiungi carta bar. */
+html:has(.ed-bar) .p-toast { bottom: calc(max(28px, calc(env(safe-area-inset-bottom, 0px) + 12px)) + 76px); }
+/* …unless the screen is under a tab (say, a missing topic under Impara). */
+.shell-has-tabs .nm-float.low { bottom: calc(var(--tabs-bottom) + 70px); }

@@ -1,32 +1,16 @@
-'use client'
+import type { Metadata } from 'next'
 import { USERS } from '@/lib/users'
+import { loadOverview } from '@/lib/queries'
+import WhoIsStudying from '@/components/WhoIsStudying'
 
-function selectUser(userId: number) {
-  const oneYear = 60 * 60 * 24 * 365
-  document.cookie = `userId=${userId}; path=/; max-age=${oneYear}; SameSite=Lax`
-  window.location.href = '/home'
-}
+export const metadata: Metadata = { title: 'Chi studia? — Italiano' }
 
-export default function LoginPage() {
-  return (
-    <main className="min-h-screen flex flex-col items-center justify-center gap-8 bg-qz-bg">
-      <div className="text-center">
-        <div className="text-6xl mb-4">🇮🇹</div>
-        <h1 className="text-3xl font-bold text-qz-text">Italiano</h1>
-        <p className="text-qz-secondary mt-2">Chi sei? / Who are you?</p>
-      </div>
-      <div className="flex gap-4">
-        {USERS.map(user => (
-          <button
-            key={user.id}
-            type="button"
-            onClick={() => selectUser(user.id)}
-            className="px-8 py-3.5 text-lg font-semibold bg-qz-blue text-white rounded-full hover:bg-qz-blue-dark transition-colors cursor-pointer shadow-[0px_4px_16px_0px_rgba(66,85,255,0.30)]"
-          >
-            {user.name}
-          </button>
-        ))}
-      </div>
-    </main>
-  )
+/** Chi studia?: each person with what's due for them today. */
+export default async function LoginPage() {
+  const people = await Promise.all(USERS.map(async user => {
+    // The picker still works if the numbers can't load.
+    const due = await loadOverview(user.id).then(o => o.due, () => null)
+    return { id: user.id, name: user.name, due }
+  }))
+  return <WhoIsStudying people={people} />
 }

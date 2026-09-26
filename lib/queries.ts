@@ -19,7 +19,7 @@ const CARD_COLUMNS = 'id, set_id, italian, article, chapter, enabled, conjugatio
  */
 async function loadFormProgress(userId: number): Promise<RawFormProgress[]> {
   const db = createServerClient()
-  const { data, error } = await db.from('conjugation_progress').select('card_id, next_review_at').eq('user_id', userId)
+  const { data, error } = await db.from('conjugation_progress').select('card_id, pronoun, next_review_at').eq('user_id', userId)
   return error ? [] : (data as RawFormProgress[])
 }
 
@@ -194,4 +194,24 @@ export async function loadTopicChoices(): Promise<TopicChoice[]> {
   const { data, error } = await db.from('sets').select('id, title, category, sort_order').order('sort_order')
   if (error) throw error
   return (data ?? []).map(({ id, title, category }) => ({ id, title, category }))
+}
+
+export interface EditTopic {
+  id: string
+  title: string
+  category: string
+  /** Every card, on or off, in the topic's order. */
+  cards: Card[]
+}
+
+/** A topic and all its cards, for Modifica argomento. Null if the set doesn't exist. */
+export async function loadEditTopic(setId: string): Promise<EditTopic | null> {
+  const db = createServerClient()
+  const [{ data: set }, { data: cards, error }] = await Promise.all([
+    db.from('sets').select('id, title, category').eq('id', setId).maybeSingle(),
+    db.from('cards').select('*').eq('set_id', setId).order('sort_order', { ascending: true }).range(0, 9999),
+  ])
+  if (!set) return null
+  if (error) throw error
+  return { id: set.id, title: set.title, category: set.category, cards: (cards ?? []) as Card[] }
 }

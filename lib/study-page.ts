@@ -7,6 +7,7 @@ import { cookies } from 'next/headers'
 import { notFound, redirect } from 'next/navigation'
 import { isValidUserId, type UserId } from './users'
 import { loadStudySet, type StudySet } from './queries'
+import { activeForms } from './forms'
 import { modeAvailability, type ModeAvailability, type StudyMode } from './paths'
 
 export async function openStudySet(
@@ -20,7 +21,7 @@ export async function openStudySet(
   if (!set) notFound()
   const availability = modeAvailability(mode, {
     activeCards: set.cards.length,
-    conjugableCards: set.cards.filter(c => c.conjugations?.present != null).length,
+    conjugableCards: set.cards.filter(c => activeForms(c.conjugations).length > 0).length,
   })
   return { userId, set, availability }
 }
