@@ -66,7 +66,7 @@ function subscribeStandalone(onChange: () => void) {
 const readStandalone = () => window.matchMedia(STANDALONE_QUERY).matches
 
 type ViewTransitionDocument = Document & {
-  startViewTransition?: (update: () => Promise<void>) => { finished: Promise<void> }
+  startViewTransition?: (update: () => Promise<void>) => { ready: Promise<void>; finished: Promise<void> }
 }
 
 export default function Shell({
@@ -109,7 +109,9 @@ export default function Shell({
       router.push(href)
       setTimeout(resolve, 3000) // never hold the old screen longer than this
     }))
-    transition.finished.finally(() => { delete root.dataset.nav })
+    // A browser may skip the animation (say, the tab is hidden); navigation still happens.
+    transition.ready.catch(() => {})
+    transition.finished.catch(() => {}).finally(() => { delete root.dataset.nav })
   }, [router])
 
   // ── time zone: Oggi's greeting and date are worded in the browser's zone ──

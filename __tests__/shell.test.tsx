@@ -146,6 +146,28 @@ describe('NavLink', () => {
     expect(nav.push).toHaveBeenCalledWith('/saved')
   })
 
+  it('still navigates, without an uncaught error, when the browser aborts the transition', async () => {
+    const aborted = () => Promise.reject(new DOMException('Transition was aborted because of invalid state', 'InvalidStateError'))
+    const unhandled = vi.fn()
+    process.on('unhandledRejection', unhandled)
+    const doc = document as unknown as { startViewTransition?: unknown }
+    doc.startViewTransition = (update: () => Promise<void>) => {
+      void update()
+      return { ready: aborted(), finished: aborted() }
+    }
+    try {
+      renderShell(<NavLink href="/saved">Salvate</NavLink>)
+      fireEvent.click(screen.getByText('Salvate', { selector: 'a[href="/saved"]:not(.nm-tab)' }))
+      await act(async () => { await new Promise(r => setTimeout(r, 10)) })
+      expect(nav.push).toHaveBeenCalledWith('/saved')
+      expect(unhandled).not.toHaveBeenCalled()
+      expect(document.documentElement.dataset.nav).toBeUndefined()
+    } finally {
+      delete doc.startViewTransition
+      process.off('unhandledRejection', unhandled)
+    }
+  })
+
   it('leaves modified clicks to the browser', () => {
     renderShell(<NavLink href="/saved">Salvate</NavLink>)
     fireEvent.click(screen.getByText('Salvate', { selector: 'a[href="/saved"]:not(.nm-tab)' }), { metaKey: true })
