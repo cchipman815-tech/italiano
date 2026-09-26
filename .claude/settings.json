@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(npm test)",
+      "Bash(npm ci *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(git pull *)",
+      "Bash(git fetch *)",
+      "Bash(bash .claude/skills/italiano-deploy/scripts/*)",
+      "Bash(vercel --prod)",
+      "Bash(npx vercel --prod)",
+      "Bash(vercel inspect *)",
+      "Bash(vercel rollback *)",
+      "Bash(vercel promote *)",
+      "Bash(vercel env *)",
+      "mcp__2fcf8f43-5b23-4c1f-8137-d3e2a00dbe82__get_runtime_errors",
+      "mcp__2fcf8f43-5b23-4c1f-8137-d3e2a00dbe82__get_runtime_logs"
+    ]
+  }
+}
