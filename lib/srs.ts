@@ -54,8 +54,47 @@ export function calculateNextReview(state: SRSState, correct: boolean): SRSState
   }
 }
 
+export function todayString(): string {
+  return toDateString(new Date())
+}
+
 export function isDueToday(next_review_at: string | null): boolean {
   if (!next_review_at) return true  // never reviewed → always due
-  const today = toDateString(new Date())
+  const today = todayString()
   return next_review_at <= today
+}
+
+export interface DueNewCounts {
+  /** Reviewed before and due today or earlier: cards plus conjugation forms. */
+  due: number
+  /** Enabled cards never reviewed. */
+  new: number
+}
+
+/**
+ * Oggi's two numbers. Unlike isDueToday(), a card that was never reviewed
+ * is new, not due. Disabled cards count as neither, and a conjugation form
+ * counts only while its verb card is enabled.
+ */
+export function countDueAndNew(
+  cards: { id: string; enabled?: boolean | null }[],
+  progress: { card_id: string; next_review_at: string | null }[],
+  conjugationProgress: { card_id: string; next_review_at: string | null }[] = [],
+  today: string = todayString(),
+): DueNewCounts {
+  const enabled = new Set(cards.filter(c => c.enabled !== false).map(c => c.id))
+  const reviewedOn = new Map(progress.map(p => [p.card_id, p.next_review_at]))
+  const isDue = (next: string | null | undefined) => next != null && next <= today
+
+  let due = 0
+  let fresh = 0
+  for (const id of enabled) {
+    const next = reviewedOn.get(id)
+    if (next == null) fresh++
+    else if (isDue(next)) due++
+  }
+  for (const form of conjugationProgress) {
+    if (enabled.has(form.card_id) && isDue(form.next_review_at)) due++
+  }
+  return { due, new: fresh }
 }
