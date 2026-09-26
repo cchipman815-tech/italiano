@@ -10,6 +10,7 @@ export async function GET() {
   const { data, error } = await db
     .from('saved_translations')
     .select('*')
+    .eq('user_id', userId)
     .order('created_at', { ascending: false })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -35,8 +36,8 @@ export async function POST(request: NextRequest) {
   const { data, error } = await db
     .from('saved_translations')
     .upsert(
-      { english, italian, created_at: new Date().toISOString() },
-      { onConflict: 'english,italian' }
+      { user_id: userId, english, italian, created_at: new Date().toISOString() },
+      { onConflict: 'user_id,english,italian' }
     )
     .select()
     .single()

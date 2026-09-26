@@ -15,6 +15,7 @@ export async function DELETE(
     .from('saved_translations')
     .delete()
     .eq('id', id)
+    .eq('user_id', userId)
     .select()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

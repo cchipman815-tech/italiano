@@ -65,6 +65,22 @@ export interface Progress {
   next_review_at: string | null
 }
 
+export type Pronoun = keyof ConjugationForms
+
+/** SRS state for one conjugation form of a verb card (migration 010). */
+export interface ConjugationProgress {
+  user_id: number
+  card_id: string
+  tense: string
+  pronoun: Pronoun
+  known: boolean
+  last_seen_at: string
+  interval: number
+  ease_factor: number
+  repetitions: number
+  next_review_at: string | null
+}
+
 export interface SetWithProgress extends Set {
   total_cards: number
   known_cards: number
@@ -77,6 +93,7 @@ export interface SetWithCards extends Set {
 
 export interface SavedTranslation {
   id: string
+  user_id: number
   english: string
   italian: string
   created_at: string
