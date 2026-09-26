@@ -2,13 +2,16 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Card } from '@/lib/types'
-import { shuffleArray } from '@/lib/utils'
 import SpeakButton from '@/components/SpeakButton'
 import GenderBadge from '@/components/GenderBadge'
 
 interface Props {
-  setId: string
+  /** The deck, already in study order (shuffled on the server so hydration matches). */
   cards: Card[]
+  /** Where "Back" goes when the session ends. */
+  backHref: string
+  /** Its label, e.g. the topic's title or "Oggi". */
+  backLabel: string
 }
 
 async function saveProgress(cardId: string, known: boolean) {
@@ -19,9 +22,9 @@ async function saveProgress(cardId: string, known: boolean) {
   })
 }
 
-export default function ReviewStudy({ setId, cards }: Props) {
+export default function ReviewStudy({ cards, backHref, backLabel }: Props) {
   const router = useRouter()
-  const [deck] = useState(() => shuffleArray(cards))
+  const deck = cards
   const [index, setIndex] = useState(0)
   const [flipped, setFlipped] = useState(false)
   const [results, setResults] = useState<{ correct: number; incorrect: number }>({
@@ -81,10 +84,11 @@ export default function ReviewStudy({ setId, cards }: Props) {
             Review Again
           </button>
           <button
-            onClick={() => router.push(`/sets/${setId}`)}
+            type="button"
+            onClick={() => router.push(backHref)}
             className="px-6 py-2.5 border-2 border-qz-border rounded-full text-qz-secondary font-medium hover:border-qz-blue hover:text-qz-blue cursor-pointer transition-colors"
           >
-            Back to Set
+            {backLabel}
           </button>
         </div>
       </div>
