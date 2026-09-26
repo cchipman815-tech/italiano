@@ -1,27 +1,82 @@
 @import "tailwindcss";
 
-/* ─── Quizlet design tokens ──────────────────────────────────────────────── */
-:root {
-  --qz-blue:        #4255ff;
-  --qz-blue-dark:   #3345ef;
-  --qz-blue-light:  #edefff;
-  --qz-bg:          #f6f7fb;
-  --qz-text:        #282e3e;
-  --qz-secondary:   #586380;
-  --qz-muted:       #8b90a0;
-  --qz-border:      #d9dde8;
-  --qz-subtle:      #edeef4;
-  --qz-white:       #ffffff;
+/* ═══ Notte design tokens ═══════════════════════════════════════════════════
+   Ported from docs/design/notte-prototype.html (the `.nm{…}` and
+   `[data-mode="giorno"] .nm{…}` blocks). The server stamps data-mode on
+   <html> from the `theme` cookie; Notte is the default. */
 
-  /* shadows */
-  --qz-shadow-card: 0px 4px 32px 0px rgba(40,46,62,0.10);
-  --qz-shadow-sm:   0px 1px 3px 0px rgba(40,46,62,0.10);
+/* Notte (default) */
+:root {
+  color-scheme: dark;
+  --bg:#12100E;--surf:#1C1916;--surf2:#25211D;--ink:#F2EDE6;--ink2:#B9B0A4;--hl:rgba(255,255,255,.08);
+  --ac:#E0A458;--ac-rgb:224,164,88;--ac-t:#E0A458;--ac-line:#E0A458;--on-ac:#12100E;--ac-edge:transparent;
+  --ok:#86C79A;--ok-rgb:134,199,154;--no:#F07F72;--no-rgb:240,127,114;
+  --wash:rgba(255,255,255,.05);--wash2:rgba(255,255,255,.1);--wash-sh:inset 0 1px 0 rgba(255,255,255,.12);
+  --glass:rgba(38,34,30,.56);--glass-sheet:rgba(34,30,26,.74);--glass-hi:rgba(255,255,255,.14);--glass-edge:rgba(255,255,255,.07);--glass-sh:0 14px 34px -12px rgba(0,0,0,.7);
+  --top-glass:rgba(24,21,18,.62);--face-a:#201C18;--face-b:#171411;--face-sh:rgba(0,0,0,.85);--under:#1A1714;
+  --core-a:#221E1A;--core-b:#1A1714;--inset-hi:rgba(255,255,255,.08);
+  --dim:rgba(6,5,4,.55);--grab:rgba(255,255,255,.22);--stamp-bg:rgba(18,16,14,.6);--track:rgba(255,255,255,.14);--knob:#F2EDE6;
+  --glow-a:.22;--glow-b:.10;--grain-op:.06;--grain-blend:overlay;
 }
 
-@theme inline {
-  --font-sans: 'Inter', -apple-system, 'system-ui', sans-serif;
+/* Giorno (warm paper). Measured: ink 14.99, ink-2 5.72, Ambra text 5.51, CTA label 7.72, edge 3.76, know 5.03, learn 5.19 */
+:root[data-mode="giorno"] {
+  color-scheme: light;
+  --bg:#F6F1E9;--surf:#FFFCF7;--surf2:#EFE8DD;--ink:#221C16;--ink2:#675D52;--hl:rgba(34,28,22,.1);
+  --ac-t:#8A5510;--ac-line:#A86F24;--on-ac:#221C16;--ac-edge:#A86F24;
+  --ok:#2E7449;--ok-rgb:46,116,73;--no:#B03F2E;--no-rgb:176,63,46;
+  --wash:rgba(34,28,22,.045);--wash2:#FFFFFF;--wash-sh:0 1px 3px rgba(60,40,20,.14);
+  --glass:rgba(255,252,247,.62);--glass-sheet:rgba(255,252,247,.82);--glass-hi:rgba(255,255,255,.95);--glass-edge:rgba(34,28,22,.08);--glass-sh:0 14px 34px -14px rgba(60,40,20,.3);
+  --top-glass:rgba(246,241,233,.74);--face-a:#FFFFFF;--face-b:#FFFCF7;--face-sh:rgba(60,40,20,.22);--under:#EFE8DD;
+  --core-a:#FFFFFF;--core-b:#FFFCF7;--inset-hi:rgba(255,255,255,.95);
+  --dim:rgba(34,28,22,.26);--grab:rgba(34,28,22,.2);--stamp-bg:rgba(255,252,247,.85);--track:rgba(34,28,22,.16);--knob:#FFFFFF;
+  --glow-a:.26;--glow-b:.12;--grain-op:.05;--grain-blend:multiply;
+}
 
-  /* expose tokens as Tailwind color utilities */
+/* ─── Motion tokens ────────────────────────────────────────────────────────── */
+:root {
+  --d-micro:150ms;--d-small:250ms;--d-medium:400ms;--d-large:550ms;--stagger:40ms;
+  --e-standard:cubic-bezier(.2,0,0,1);--e-decel:cubic-bezier(0,0,0,1);
+  --e-accel:cubic-bezier(.3,0,1,1);--e-sharp:cubic-bezier(.4,0,.2,1);
+}
+
+/* Reduced motion: fades keep communicating, movement goes. Components add
+   their own overrides (flip, push, sheet, fling become fades; no shake). */
+@media (prefers-reduced-motion: reduce) {
+  :root { --d-small:150ms;--d-medium:150ms;--d-large:150ms;--stagger:0ms; }
+  html.playing body::before { animation: none; }
+}
+
+/* Theme switch snaps: setPref('theme') adds this for two frames. */
+.no-trans *, .no-trans *::before, .no-trans *::after { transition: none !important; }
+
+@theme inline {
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-serif: var(--font-fraunces), 'Iowan Old Style', Georgia, serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, 'SF Mono', Menlo, monospace;
+
+  --color-bg:      var(--bg);
+  --color-surf:    var(--surf);
+  --color-surf2:   var(--surf2);
+  --color-ink:     var(--ink);
+  --color-ink2:    var(--ink2);
+  --color-hl:      var(--hl);
+  --color-ac:      var(--ac);
+  --color-ac-t:    var(--ac-t);
+  --color-ac-line: var(--ac-line);
+  --color-on-ac:   var(--on-ac);
+  --color-ac-edge: var(--ac-edge);
+  --color-ok:      var(--ok);
+  --color-no:      var(--no);
+  --color-wash:    var(--wash);
+  --color-wash2:   var(--wash2);
+
+  --ease-standard: var(--e-standard);
+  --ease-decel:    var(--e-decel);
+  --ease-accel:    var(--e-accel);
+  --ease-sharp:    var(--e-sharp);
+
+  /* Transitional: the Quizlet tokens, aliased below. Removed in Phase 6. */
   --color-qz-blue:       var(--qz-blue);
   --color-qz-blue-dark:  var(--qz-blue-dark);
   --color-qz-blue-light: var(--qz-blue-light);
@@ -34,15 +89,111 @@
   --color-qz-white:      var(--qz-white);
 }
 
-/* ─── Base ───────────────────────────────────────────────────────────────── */
+/* ─── Base ─────────────────────────────────────────────────────────────────── */
+/* The ground lives on <html> so the fixed glow below can sit behind content. */
+html { background: var(--bg); }
 body {
-  background-color: var(--qz-bg);
-  color: var(--qz-text);
-  font-family: 'Inter', -apple-system, 'system-ui', sans-serif;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  letter-spacing: -.005em;
   -webkit-font-smoothing: antialiased;
 }
 
-/* ─── Quizlet card shadow utility ───────────────────────────────────────── */
+:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+
+/* Ambra glow: still, except while pronunciation plays (html.playing). */
+body::before {
+  content: "";
+  position: fixed;
+  inset: -25%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(38% 26% at 28% 16%, rgba(var(--ac-rgb), var(--glow-a)), transparent 70%),
+    radial-gradient(34% 28% at 82% 74%, rgba(var(--ac-rgb), var(--glow-b)), transparent 70%);
+}
+html.playing body::before { animation: nm-pulse 1200ms var(--e-standard) infinite; }
+@keyframes nm-pulse { 50% { opacity: .45; } }
+
+/* Film grain over everything; never takes a tap. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  opacity: var(--grain-op);
+  mix-blend-mode: var(--grain-blend);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+/* ─── Bilingual labels (components/Bi.tsx): immersion it / mix / en ───────── */
+.nm-en { display: none; }
+[data-imm="mix"] .nm-en { display: inline; color: var(--ink2); font-weight: 400; font-size: .86em; margin-left: .3em; }
+[data-imm="mix"] .nm-en::before { content: "· "; }
+[data-imm="mix"] .nm-st .nm-en { display: block; margin: 2px 0 0; font-size: 12px; }
+[data-imm="mix"] .nm-st .nm-en::before { content: none; }
+[data-imm="mix"] .on-ac .nm-en { color: inherit; opacity: .72; }
+[data-imm="mix"] .nm-x .nm-en { display: none; }
+[data-imm="en"] .nm-it { display: none; }
+[data-imm="en"] .nm-en { display: inline; margin: 0; font-size: 1em; color: inherit; opacity: 1; font-weight: inherit; }
+[data-imm="en"] .nm-en::before { content: none; }
+[data-imm="en"] .nm-st .nm-en { display: block; }
+
+/* ─── Utilities ────────────────────────────────────────────────────────────── */
+/* Glass: bars and sheets only. */
+@utility glass {
+  background: var(--glass);
+  backdrop-filter: blur(22px) saturate(1.6);
+  -webkit-backdrop-filter: blur(22px) saturate(1.6);
+  box-shadow: inset 0 1px 0 var(--glass-hi), inset 0 0 0 .5px var(--glass-edge), var(--glass-sh);
+}
+
+/* Buttons, rows and chips press to .96. */
+@utility press {
+  transition: scale var(--d-micro) var(--e-standard);
+  &:active { scale: .96; }
+}
+
+/* Italian words and headings. */
+@utility ser {
+  font-family: var(--font-serif);
+  font-optical-sizing: auto;
+}
+
+@utility tab-n { font-variant-numeric: tabular-nums; }
+
+@utility pt-safe { padding-top: env(safe-area-inset-top, 0px); }
+@utility pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
+@utility pl-safe { padding-left: env(safe-area-inset-left, 0px); }
+@utility pr-safe { padding-right: env(safe-area-inset-right, 0px); }
+
+/* ═══ Transitional: Quizlet aliases (removed in Phase 6) ═════════════════════
+   Unmigrated pages keep their qz-* classes but draw from the Notte tokens.
+   bg-white / text-white are remapped too, or white cards would carry
+   light ink in Notte. These are unlayered, so they beat Tailwind's layer. */
+:root {
+  --qz-blue:        var(--ac);
+  --qz-blue-dark:   var(--ac-line);
+  --qz-blue-light:  rgba(var(--ac-rgb), .16);
+  --qz-bg:          var(--bg);
+  --qz-text:        var(--ink);
+  --qz-secondary:   var(--ink2);
+  --qz-muted:       color-mix(in srgb, var(--ink2) 70%, var(--bg));
+  --qz-border:      var(--hl);
+  --qz-subtle:      var(--surf2);
+  --qz-white:       var(--surf);
+  --qz-shadow-card: inset 0 1px 0 var(--inset-hi);
+  --qz-shadow-sm:   inset 0 1px 0 var(--inset-hi);
+}
+.bg-white { background-color: var(--surf); }
+.text-white { color: var(--on-ac); }
+/* Ambra as text or a line needs the darker Giorno values (--ac is 1.94:1 on paper). */
+.text-qz-blue { color: var(--ac-t); }
+.border-qz-blue { border-color: var(--ac-line); }
+.bg-qz-blue { box-shadow: inset 0 0 0 1px var(--ac-edge); }
+
 .qz-card {
   background: var(--qz-white);
   border-radius: 16px;

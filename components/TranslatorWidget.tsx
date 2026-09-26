@@ -129,13 +129,13 @@ export default function TranslatorWidget() {
     ? 'Type an English word or phrase…'
     : 'Type an Italian word or phrase…'
 
-  const inputCls = 'w-full border-2 border-[#c5caff] rounded-xl px-3 py-2.5 text-qz-text text-sm placeholder:text-qz-secondary focus:outline-none focus:border-qz-blue transition-colors bg-white'
+  const inputCls = 'w-full border-2 border-qz-border rounded-xl px-3 py-2.5 text-qz-text text-sm placeholder:text-qz-secondary focus:outline-none focus:border-qz-blue transition-colors bg-white'
 
   return (
-    <div className="rounded-2xl p-5 mb-6" style={{ background: '#eef0ff', border: '1px solid #d5d9ff' }}>
+    <div className="rounded-2xl p-5 mb-6" style={{ background: 'var(--qz-white)', border: '1px solid var(--qz-border)' }}>
       <div className="flex items-center justify-between mb-3">
         <p className="text-xs font-semibold text-qz-secondary uppercase tracking-wide">Quick Translate</p>
-        <div className="flex gap-1 bg-white rounded-lg p-0.5 border border-[#d5d9ff]">
+        <div className="flex gap-1 bg-white rounded-lg p-0.5 border border-qz-border">
           <button
             onClick={() => handleDirectionChange('en-it')}
             className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-colors cursor-pointer ${
@@ -186,7 +186,7 @@ export default function TranslatorWidget() {
       {error && <p className="text-xs text-red-600 mt-2">{error}</p>}
 
       {result && (
-        <div className="mt-4 bg-white border border-[#d5d9ff] rounded-xl p-4">
+        <div className="mt-4 bg-white border border-qz-border rounded-xl p-4">
           {saved && (
             <p className="text-xs text-green-600 font-medium mb-2">Saved ✓</p>
           )}

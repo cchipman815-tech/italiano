@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: 'Italian language flashcards for Chance and Jennifer',
     start_url: '/home',
     display: 'standalone',
-    background_color: '#f6f7fb',
-    theme_color: '#4255ff',
+    background_color: '#12100E',
+    theme_color: '#12100E',
     icons: [
       {
         src: '/icon-192.png',
