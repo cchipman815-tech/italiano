@@ -1,15 +1,6 @@
-import TranslatorWidget from '@/components/TranslatorWidget'
-import LargeTitle from '@/components/LargeTitle'
-import { t } from '@/lib/i18n'
+import TranslateView from '@/components/TranslateView'
 
-/** Traduci. For now it hosts the existing widget; PR 5 rebuilds this screen. */
+/** Traduci: the translator, saving every result to Salvate. */
 export default function TranslatePage() {
-  return (
-    <>
-      <LargeTitle title={t('translate')} />
-      <div className="max-w-4xl mx-auto px-4 py-6">
-        <TranslatorWidget />
-      </div>
-    </>
-  )
+  return <TranslateView />
 }
