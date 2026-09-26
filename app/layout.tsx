@@ -3,6 +3,8 @@ import { cookies } from 'next/headers'
 import { Fraunces, Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration'
+import Shell from '@/components/Shell'
+import { getUserById, isValidUserId } from '@/lib/users'
 import { THEME_COLORS, prefAttributes, readPrefs } from '@/lib/prefs'
 
 const fraunces = Fraunces({
@@ -24,6 +26,12 @@ async function getPrefs() {
   return readPrefs(name => cookieStore.get(name)?.value)
 }
 
+async function getUser() {
+  const cookieStore = await cookies()
+  const id = Number(cookieStore.get('userId')?.value)
+  return isValidUserId(id) ? getUserById(id) : null
+}
+
 export async function generateViewport(): Promise<Viewport> {
   const { theme } = await getPrefs()
   return {
@@ -36,7 +44,7 @@ export async function generateViewport(): Promise<Viewport> {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const prefs = await getPrefs()
+  const [prefs, user] = await Promise.all([getPrefs(), getUser()])
   return (
     <html
       lang="en"
@@ -45,7 +53,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     >
       <body className="min-h-dvh antialiased">
         <ServiceWorkerRegistration />
-        {children}
+        <Shell user={user ? { id: user.id, name: user.name } : null} initialPrefs={prefs}>
+          {children}
+        </Shell>
       </body>
     </html>
   )

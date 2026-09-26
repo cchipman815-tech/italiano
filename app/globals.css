@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./shell.css";
 
 /* ═══ Notte design tokens ═══════════════════════════════════════════════════
    Ported from docs/design/notte-prototype.html (the `.nm{…}` and
@@ -116,12 +117,12 @@ body::before {
 html.playing body::before { animation: nm-pulse 1200ms var(--e-standard) infinite; }
 @keyframes nm-pulse { 50% { opacity: .45; } }
 
-/* Film grain over everything; never takes a tap. */
+/* Film grain over the page and tab bar, under the undo bar and sheets; never takes a tap. */
 body::after {
   content: "";
   position: fixed;
   inset: 0;
-  z-index: 100;
+  z-index: 18;
   pointer-events: none;
   opacity: var(--grain-op);
   mix-blend-mode: var(--grain-blend);
@@ -146,7 +147,6 @@ body::after {
 @utility glass {
   background: var(--glass);
   backdrop-filter: blur(22px) saturate(1.6);
-  -webkit-backdrop-filter: blur(22px) saturate(1.6);
   box-shadow: inset 0 1px 0 var(--glass-hi), inset 0 0 0 .5px var(--glass-edge), var(--glass-sh);
 }
 

@@ -1,0 +1,183 @@
+/* ═══ App shell ═══════════════════════════════════════════════════════════════
+   Ported from docs/design/notte-prototype.html. Values are copied; positions
+   that were `absolute` inside the prototype's phone are `fixed` here and
+   respect the safe areas. Stacking follows the prototype: top bar 10,
+   tabs 12, grain 18, undo bar 19, dim 20, sheet 21. */
+
+:root {
+  /* The tab bar floats 22px up, or just above the home indicator. */
+  --tabs-bottom: max(22px, calc(env(safe-area-inset-bottom, 0px) + 6px));
+  --vt-dim: .68;
+}
+:root[data-mode="giorno"] { --vt-dim: .86; }
+
+#shell-content { min-height: 100dvh; }
+#shell-content.shell-has-tabs { padding-bottom: calc(var(--tabs-bottom) + 76px); }
+html.sheet-open { overflow: hidden; }
+
+/* ─── Top bar and large title ─────────────────────────────────────────────── */
+.nm-top {
+  position: sticky; top: 0; z-index: 10;
+  height: calc(44px + env(safe-area-inset-top, 0px));
+  padding: env(safe-area-inset-top, 0px) 12px 0 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  transition-property: background-color, box-shadow;
+  transition-duration: var(--d-small);
+  transition-timing-function: var(--e-standard);
+}
+.nm-top .inl { font-weight: 600; font-size: 15px; opacity: 0; transition: opacity var(--d-small) var(--e-standard); }
+.nm-top.collapsed {
+  background: var(--top-glass);
+  backdrop-filter: blur(20px) saturate(1.5);
+  box-shadow: 0 .5px 0 var(--hl);
+}
+.nm-top.collapsed .inl { opacity: 1; }
+
+.nm-av { width: 44px; height: 44px; display: grid; place-items: center; border: 0; background: none; padding: 0; color: inherit; }
+.nm-av span {
+  width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+  font-weight: 600; font-size: 13px; color: var(--ink); background: var(--wash2);
+  box-shadow: var(--wash-sh), 0 0 0 1px rgba(var(--ac-rgb), .45);
+}
+
+.nm-back { display: flex; align-items: center; gap: 2px; min-height: 44px; color: var(--ac-t); font-size: 15px; font-weight: 500; background: none; border: 0; padding: 0; text-decoration: none; min-width: 0; }
+.nm-back > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nm-back svg { flex: none; rotate: 180deg; }
+.nm-sub { padding: env(safe-area-inset-top, 0px) 16px 0 10px; gap: 12px; }
+.nm-sub .cnt { flex: none; color: var(--ink2); font-variant-numeric: tabular-nums; font-size: 13px; }
+
+.nm-lt { padding: 0 18px; display: grid; gap: 3px; }
+.nm-lt h1 { font-size: 31px; font-weight: 600; letter-spacing: -.025em; line-height: 1.05; margin: 0; }
+.nm-lt small { color: var(--ink2); font-size: 13px; }
+
+/* Press feedback: .96 over --d-micro. */
+.nm-back, .nm-av, .nm-seg button, .nm-me-sw, .nm-out, .nm-tog, .link-btn {
+  transition: scale var(--d-micro) var(--e-standard), background-color var(--d-micro) var(--e-standard), color var(--d-micro) var(--e-standard);
+}
+.nm-back:active, .nm-av:active, .nm-seg button:active, .nm-me-sw:active, .nm-out:active, .link-btn:active { scale: .96; }
+
+/* ─── Tab bar ─────────────────────────────────────────────────────────────── */
+.nm-tabs {
+  position: fixed; left: 12px; right: 12px; bottom: var(--tabs-bottom); z-index: 12;
+  max-width: 480px; margin-inline: auto;
+  height: 60px; border-radius: 30px; padding: 0 6px;
+  display: grid; grid-template-columns: repeat(4, 1fr); align-items: center;
+  view-transition-name: tabbar;
+  transition: translate var(--d-small) var(--e-decel);
+}
+.nm-tabs.away { translate: 0 150%; transition: translate var(--d-small) var(--e-accel); }
+.nm-tab {
+  position: relative; z-index: 1;
+  display: grid; justify-items: center; align-content: center; gap: 2px; min-height: 48px;
+  border-radius: 24px; font-size: 10.5px; font-weight: 500; color: var(--ink2); text-decoration: none;
+  transition: color var(--d-small) var(--e-standard), scale var(--d-micro) var(--e-standard);
+}
+.nm-tab:active { scale: .96; }
+.nm-tab.on { color: var(--ac-t); }
+.nm-tabs .pill {
+  position: absolute; left: 6px; top: 6px; bottom: 6px; width: calc((100% - 12px) / 4);
+  border-radius: 24px; background: rgba(var(--ac-rgb), .15);
+  transition: translate var(--d-small) var(--e-standard);
+}
+
+/* ─── Undo bar ────────────────────────────────────────────────────────────── */
+.p-toast {
+  position: fixed; left: 14px; right: 14px; z-index: 19;
+  bottom: max(28px, calc(env(safe-area-inset-bottom, 0px) + 12px));
+  max-width: 480px; margin-inline: auto;
+  border-radius: 18px; min-height: 52px; display: flex; align-items: center; gap: 2px; padding: 4px 4px 4px 16px; font-size: 14px;
+  opacity: 0; translate: 0 12px; visibility: hidden;
+  transition: opacity var(--d-small) var(--e-accel), translate var(--d-small) var(--e-accel), visibility 0s linear var(--d-small);
+}
+.p-toast.raised { bottom: calc(var(--tabs-bottom) + 70px); }
+.p-toast.on {
+  opacity: 1; translate: 0 0; visibility: visible;
+  transition: opacity var(--d-medium) var(--e-decel), translate var(--d-medium) var(--e-decel), visibility 0s;
+}
+.p-toast .msg { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.p-toast b { font-weight: 600; }
+.p-toast .x { width: 44px; height: 44px; flex: none; border: 0; background: none; color: var(--ink2); display: grid; place-items: center; border-radius: 50%; }
+.link-btn { min-height: 44px; padding: 0 10px; border: 0; border-radius: 10px; background: none; color: var(--ac-t); font-size: 14px; font-weight: 500; }
+
+/* ─── Sheets ──────────────────────────────────────────────────────────────── */
+.p-dim { position: fixed; inset: 0; z-index: 20; background: var(--dim); opacity: 0; pointer-events: none; transition: opacity var(--d-small) var(--e-standard); }
+.p-dim.on { opacity: 1; pointer-events: auto; }
+.p-sheet {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 21;
+  max-width: 560px; margin-inline: auto;
+  translate: 0 105%; transition: translate var(--d-small) var(--e-accel);
+  border-radius: 28px 28px 0 0;
+  padding: 8px 14px calc(28px + env(safe-area-inset-bottom, 0px));
+  display: flex; flex-direction: column; gap: 10px;
+  overflow-y: auto; overscroll-behavior: contain;
+  background: var(--glass-sheet);
+  backdrop-filter: blur(22px) saturate(1.6);
+  box-shadow: inset 0 1px 0 var(--glass-hi), inset 0 0 0 .5px var(--glass-edge), var(--glass-sh);
+}
+.p-sheet.open { translate: 0 0; transition: translate var(--d-medium) var(--e-decel); }
+.p-sheet.dragging { transition: none; }
+.p-sheet .grabzone { touch-action: none; cursor: grab; padding: 4px 14px 2px; margin: -8px -14px 0; }
+.p-sheet.dragging .grabzone { cursor: grabbing; }
+.p-sheet .sr { opacity: 0; translate: 0 8px; transition: opacity var(--d-small) var(--e-decel), translate var(--d-small) var(--e-decel); }
+.p-sheet.open .sr { opacity: 1; translate: 0 0; }
+
+.nm-grab { width: 38px; height: 5px; border-radius: 3px; background: var(--grab); margin: 0 auto 4px; flex: none; }
+.nm-sh-h { display: grid; gap: 3px; padding: 0 4px; }
+.nm-sh-h .ser { font-size: 25px; line-height: 1.05; letter-spacing: -.015em; }
+.nm-sh-h small { color: var(--ink2); font-size: 12.5px; }
+.nm-scrl { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; margin: 0 -2px; padding: 0 2px; }
+.nm-scrl::-webkit-scrollbar { display: none; }
+
+.nm-seg { display: flex; padding: 4px; border-radius: 14px; background: var(--wash); box-shadow: inset 0 0 0 1px var(--hl); }
+.nm-seg button { flex: 1; min-height: 40px; border: 0; border-radius: 10px; background: none; color: var(--ink2); font-size: 13px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.nm-seg button[aria-pressed="true"] { background: var(--wash2); color: var(--ink); box-shadow: var(--wash-sh); }
+
+/* Profile sheet */
+.nm-me { display: flex; align-items: center; gap: 12px; padding: 4px 4px 2px; }
+.nm-me .nm-av span { width: 44px; height: 44px; font-size: 16px; }
+.nm-me b { font-size: 17px; font-weight: 600; display: block; }
+.nm-me small { color: var(--ink2); font-size: 12.5px; }
+.nm-me-sw { margin-left: auto; min-height: 40px; padding: 0 12px; border: 0; border-radius: 12px; background: var(--wash); box-shadow: inset 0 0 0 1px var(--hl); color: var(--ink); font-size: 13px; font-weight: 500; }
+.nm-pref { border-radius: 18px; background: var(--wash); box-shadow: inset 0 0 0 1px var(--hl); padding: 12px 14px; display: grid; gap: 9px; }
+.nm-pref > span { font-size: 13px; font-weight: 500; color: var(--ink2); }
+.nm-tog { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; width: 100%; border: 0; background: none; padding: 0; color: var(--ink); font-size: 15px; font-weight: 500; text-align: start; }
+.nm-tog small { display: block; color: var(--ink2); font-size: 12px; font-weight: 400; margin-top: 1px; }
+.nm-sw2 { flex: none; width: 50px; height: 30px; border-radius: 99px; background: var(--track); position: relative; transition: background-color var(--d-micro) var(--e-standard); }
+.nm-sw2::after { content: ""; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: var(--knob); box-shadow: 0 2px 6px rgba(0,0,0,.35); transition: translate var(--d-micro) var(--e-standard); }
+.nm-tog[aria-checked="true"] .nm-sw2 { background: var(--ac); }
+.nm-tog[aria-checked="true"] .nm-sw2::after { translate: 20px 0; }
+.nm-out { min-height: 48px; border: 0; border-radius: 14px; background: var(--wash); color: var(--ink); font-weight: 500; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 8px; flex: none; }
+
+/* ─── Screen transitions (View Transitions API; no animation without it) ──── */
+/* Tabs cross-fade; push slides the new screen in from the right while the old
+   one drifts to −25% and dims; back reverses it, faster. */
+::view-transition-old(root), ::view-transition-new(root) {
+  animation-duration: var(--d-small);
+  animation-timing-function: var(--e-standard);
+}
+html[data-nav="push"]::view-transition-new(root) { animation: vt-enter-right var(--d-medium) var(--e-decel) both; }
+html[data-nav="push"]::view-transition-old(root) { animation: vt-leave-left var(--d-medium) var(--e-sharp) both; }
+html[data-nav="back"]::view-transition-old(root) { z-index: 1; animation: vt-leave-right var(--d-small) var(--e-accel) both; }
+html[data-nav="back"]::view-transition-new(root) { animation: vt-enter-left var(--d-small) var(--e-decel) both; }
+@keyframes vt-enter-right { from { translate: 100% 0; } }
+@keyframes vt-leave-left  { to   { translate: -25% 0; filter: brightness(var(--vt-dim)); } }
+@keyframes vt-leave-right { to   { translate: 100% 0; } }
+@keyframes vt-enter-left  { from { translate: -25% 0; filter: brightness(var(--vt-dim)); } }
+@keyframes vt-fade-in  { from { opacity: 0; } }
+@keyframes vt-fade-out { to   { opacity: 0; } }
+
+/* The tab bar is not part of the page: it stays put and its pill slides live. */
+::view-transition-group(tabbar) { animation: none; }
+::view-transition-old(tabbar) { display: none; }
+::view-transition-new(tabbar) { animation: none; }
+
+/* ─── Reduced motion: slides, rises and drifts become fades ──────────────── */
+@media (prefers-reduced-motion: reduce) {
+  html[data-nav]::view-transition-old(root) { z-index: auto; animation: vt-fade-out var(--d-micro) var(--e-standard) both; }
+  html[data-nav]::view-transition-new(root) { animation: vt-fade-in var(--d-micro) var(--e-standard) both; }
+  .nm-tabs.away { translate: 0 0; opacity: 0; transition: opacity var(--d-small) var(--e-standard); }
+  .p-sheet { translate: 0 0; opacity: 0; pointer-events: none; transition: opacity var(--d-small) var(--e-standard); }
+  .p-sheet.open { opacity: 1; pointer-events: auto; }
+  .p-sheet .sr { translate: 0 0; transition-delay: 0s !important; }
+  .p-toast, .p-toast.on { translate: 0 0; }
+}

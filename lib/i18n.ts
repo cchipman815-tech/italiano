@@ -32,6 +32,11 @@ export const STRINGS = {
   signOut:        { it: 'Esci', en: 'Sign out' },
   whoIsStudying:  { it: 'Scegli il tuo nome', en: "Who's studying?" },
   studyingNow:    { it: 'Sta studiando', en: 'Studying now' },
+  profile:        { it: 'Profilo', en: 'Profile' },
+  installApp:     { it: "Installa l'app", en: 'Install the app' },
+  tabs:           { it: 'Schede', en: 'Tabs' },
+  dismiss:        { it: 'Chiudi', en: 'Dismiss' },
+  back:           { it: 'Indietro', en: 'Back' },
 
   // study
   review:         { it: 'Ripassa', en: 'Review' },
