@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "./shell.css";
+@import "./screens.css";
 
 /* ═══ Notte design tokens ═══════════════════════════════════════════════════
    Ported from docs/design/notte-prototype.html (the `.nm{…}` and

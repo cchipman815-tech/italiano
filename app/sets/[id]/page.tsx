@@ -7,6 +7,7 @@ import type { SetWithCards } from '@/lib/types'
 import StudyModePicker from '@/components/StudyModePicker'
 import SubpageBar from '@/components/SubpageBar'
 import { t } from '@/lib/i18n'
+import { getPathByCategory } from '@/lib/paths'
 
 async function getSet(id: string, userId: number) {
   const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/sets/${id}`, {
@@ -29,6 +30,10 @@ export default async function SetDetailPage({
   const { id } = await params
   const set = await getSet(id, userId)
   if (!set) notFound()
+
+  // Topics in a Notte path open as that path's topic sheet.
+  const path = getPathByCategory(set.category)
+  if (path) redirect(`/learn/${path.slug}?topic=${id}`)
 
   const totalCards = set.cards.length
   const knownCards = set.progress.filter(p => p.known).length

@@ -8,9 +8,10 @@ import Bi from './Bi'
 /**
  * A tab root's large title under a sticky top bar. Once the title scrolls
  * under the bar, the bar turns to glass and shows the title inline. The
- * avatar on the right opens the profile sheet.
+ * avatar on the right opens the profile sheet. Oggi passes `hello` to show
+ * its italic greeting in place of the title.
  */
-export default function LargeTitle({ title, sub }: { title: Bilingual; sub?: ReactNode }) {
+export default function LargeTitle({ title, sub, hello }: { title: Bilingual; sub?: ReactNode; hello?: string }) {
   const shell = useShell()
   const [collapsed, setCollapsed] = useState(false)
   const barRef = useRef<HTMLElement>(null)
@@ -47,10 +48,17 @@ export default function LargeTitle({ title, sub }: { title: Bilingual; sub?: Rea
           <span className="w-11" aria-hidden="true" />
         )}
       </header>
-      <div className="nm-lt">
-        <h1 ref={titleRef}><Bi {...title} /></h1>
-        {sub && <small className="nm-x">{sub}</small>}
-      </div>
+      {hello ? (
+        <div className="nm-hello">
+          <h1 ref={titleRef} className="ser" lang="it">{hello}</h1>
+          {sub && <small className="nm-x">{sub}</small>}
+        </div>
+      ) : (
+        <div className="nm-lt">
+          <h1 ref={titleRef}><Bi {...title} /></h1>
+          {sub && <small className="nm-x">{sub}</small>}
+        </div>
+      )}
     </>
   )
 }

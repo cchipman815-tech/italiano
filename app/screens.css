@@ -1,0 +1,96 @@
+/* ═══ Screens: Oggi, Impara, path pages, topic sheet ═══════════════════════════
+   Values copied from docs/design/notte-prototype.html. */
+
+/* ─── Oggi ─────────────────────────────────────────────────────────────────── */
+.nm-hello { padding: 0 18px; display: grid; gap: 2px; }
+.nm-hello h1 { font-size: 31px; font-weight: 400; font-style: italic; letter-spacing: -.02em; line-height: 1.05; margin: 0; }
+.nm-hello small { color: var(--ink2); font-size: 13px; }
+.nm-read { padding: 18px 18px 4px; display: flex; align-items: flex-end; gap: 14px; }
+.nm-read b { font-size: 76px; font-weight: 300; line-height: .82; letter-spacing: -.045em; }
+.nm-read div { display: grid; gap: 3px; padding-bottom: 2px; }
+.nm-read .due { color: var(--ac-t); font-size: 14px; font-weight: 500; }
+.nm-read .new { color: var(--ink2); font-size: 13px; }
+
+.nm-bezel { display: block; margin: 18px 14px 0; padding: 5px; border-radius: 24px; background: var(--wash); box-shadow: 0 0 0 1px var(--hl); color: inherit; text-decoration: none; }
+.nm-bezel .core { border-radius: 19px; padding: 14px 14px 14px 16px; background: linear-gradient(180deg, var(--core-a), var(--core-b)); box-shadow: inset 0 1px 0 var(--inset-hi); display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; }
+.nm-eb { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink2); }
+.nm-bezel .ser { font-size: 22px; line-height: 1.1; margin-top: 3px; display: block; }
+.nm-bezel small { color: var(--ink2); font-size: 12.5px; }
+.nm-orb { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: rgba(var(--ac-rgb), .18); color: var(--ac-t); }
+.nm-arc { height: 3px; border-radius: 2px; background: var(--hl); margin-top: 9px; grid-column: 1 / -1; }
+.nm-arc i { display: block; height: 100%; border-radius: 2px; background: var(--ac-line); }
+
+.nm-gh { padding: 22px 30px 7px; font-size: 12px; color: var(--ink2); }
+.nm-paths { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0 14px; }
+.nm-path { border-radius: 18px; background: var(--surf); box-shadow: inset 0 0 0 1px var(--hl); padding: 12px; display: grid; gap: 8px; align-content: start; min-height: 112px; color: inherit; text-decoration: none; }
+.nm-path .top { display: flex; justify-content: space-between; align-items: center; }
+.nm-path .duo { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; background: rgba(var(--ac-rgb), .16); color: var(--ac-t); }
+.nm-path b { font-size: 15px; font-weight: 600; display: block; }
+.nm-path small { color: var(--ink2); font-size: 12px; }
+.nm-path .due { color: var(--ac-t); font-weight: 500; }
+
+.nm-ring { width: 30px; height: 30px; flex: none; rotate: -90deg; }
+.nm-ring circle { fill: none; stroke-width: 3.2; }
+.nm-ring .bg { stroke: var(--hl); }
+.nm-ring .fg { stroke: var(--ac-line); stroke-linecap: round; }
+
+/* The one filled button, floating above the tab bar. */
+.nm-float { position: fixed; left: 14px; right: 14px; bottom: calc(var(--tabs-bottom) + 70px); z-index: 11; max-width: 480px; margin-inline: auto; }
+.nm-float-space { height: 84px; }
+.nm-cta {
+  text-align: start; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  min-height: 56px; width: 100%; border: 0; border-radius: 99px; padding: 6px 6px 6px 22px;
+  background: var(--ac); color: var(--on-ac); font-size: 16px; font-weight: 600; text-decoration: none;
+  box-shadow: inset 0 0 0 1px var(--ac-edge), 0 10px 30px -10px rgba(var(--ac-rgb), .6);
+  transition: scale var(--d-micro) var(--e-standard);
+}
+.nm-cta:active { scale: .96; }
+.nm-cta .orb { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: rgba(18,16,14,.12); transition: translate var(--d-small) var(--e-standard); }
+.nm-cta:hover .orb { translate: 2px -1px; }
+
+.nm-empty { display: grid; justify-items: center; text-align: center; gap: 8px; padding: 36px 26px 0; }
+.nm-empty h2 { font-size: 19px; font-weight: 600; margin: 6px 0 0; letter-spacing: -.01em; text-wrap: balance; }
+.nm-empty p { color: var(--ink2); font-size: 14px; max-width: 28ch; line-height: 1.45; text-wrap: pretty; margin: 0; }
+
+/* ─── Impara: chapter filter and path cards ────────────────────────────────── */
+.nm-caps { display: flex; gap: 6px; overflow-x: auto; padding: 14px 18px 4px; scrollbar-width: none; }
+.nm-caps::-webkit-scrollbar { display: none; }
+.nm-caps button { flex: none; min-height: 36px; padding: 0 13px; border-radius: 99px; border: 0; background: var(--wash); box-shadow: inset 0 0 0 1px var(--hl); color: var(--ink2); font-size: 13px; font-weight: 500; position: relative; transition: scale var(--d-micro) var(--e-standard), background-color var(--d-micro) var(--e-standard), color var(--d-micro) var(--e-standard); }
+.nm-caps button::after { content: ""; position: absolute; inset: -4px 0; }
+.nm-caps button:active { scale: .96; }
+.nm-caps button[aria-pressed="true"] { background: var(--ink); color: var(--bg); box-shadow: none; }
+
+.nm-pcards { display: grid; gap: 8px; padding: 10px 14px 0; }
+.nm-pcard { border-radius: 20px; background: var(--surf); box-shadow: inset 0 0 0 1px var(--hl); padding: 14px; display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; color: inherit; text-decoration: none; transition: opacity var(--d-micro) var(--e-standard), scale var(--d-micro) var(--e-standard); }
+.nm-pcard[hidden] { display: none; }
+.nm-pcard.leaving { opacity: 0; scale: .98; }
+.nm-pcard:active { scale: .96; }
+.nm-pcard .duo { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: rgba(var(--ac-rgb), .16); color: var(--ac-t); }
+.nm-pcard b { font-size: 17px; font-weight: 600; display: block; letter-spacing: -.01em; }
+.nm-pcard small { display: block; color: var(--ink2); font-size: 12.5px; margin-top: 1px; }
+.nm-pcard .meta { display: grid; justify-items: end; gap: 2px; font-size: 12px; color: var(--ink2); text-align: end; }
+.nm-pcard .meta b { font-size: 15px; color: var(--ink); font-weight: 600; }
+.nm-pcard .due { color: var(--ac-t); font-weight: 500; }
+
+/* ─── Rows (path page topics, topic sheet modes) ───────────────────────────── */
+.nm-list { margin: 0 14px; border-radius: 18px; background: var(--surf); box-shadow: inset 0 0 0 1px var(--hl); overflow: hidden; }
+.nm-list.sm { margin: 0; }
+.nm-list.sm .nm-row { min-height: 50px; }
+.nm-row { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 0 14px; position: relative; width: 100%; border: 0; background: none; color: inherit; font: inherit; text-align: start; text-decoration: none; cursor: pointer; transition: scale var(--d-micro) var(--e-standard); }
+.nm-row:active:not(:disabled) { scale: .96; }
+.nm-row + .nm-row::before { content: ""; position: absolute; top: 0; left: 56px; right: 0; height: 1px; background: var(--hl); }
+.nm-row .t { flex: 1; min-width: 0; display: grid; gap: 1px; }
+.nm-row .t b { font-weight: 500; font-size: 15px; }
+.nm-row .t small { color: var(--ink2); font-size: 12px; }
+.nm-row small .due { color: var(--ac-t); font-weight: 500; }
+.nm-row .chev { color: var(--ink2); flex: none; }
+.nm-row .duo { width: 30px; height: 30px; border-radius: 9px; flex: none; display: grid; place-items: center; background: rgba(var(--ac-rgb), .16); color: var(--ac-t); }
+.nm-row.add b { color: var(--ac-t); }
+.nm-row.add .duo { background: var(--wash); color: var(--ac-t); box-shadow: inset 0 0 0 1px var(--hl); }
+button.nm-row:disabled { cursor: default; }
+.nm-row:disabled .duo { background: var(--wash); color: var(--ink2); }
+.nm-row:disabled b { color: var(--ink2); }
+
+@media (prefers-reduced-motion: reduce) {
+  .nm-pcard.leaving { scale: 1; }
+}

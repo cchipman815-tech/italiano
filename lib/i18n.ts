@@ -52,6 +52,13 @@ export const STRINGS = {
   due:            { it: 'da ripassare', en: 'to review' },
   new:            { it: 'nuove', en: 'new' },
   backToToday:    { it: 'Torna a Oggi', en: 'Back to Today' },
+  learnNew:       { it: 'Impara qualcosa di nuovo', en: 'Learn something new' },
+  all:            { it: 'Tutti', en: 'All' },
+  chapterFilter:  { it: 'Capitolo di Prego', en: 'Prego chapter' },
+  direction:      { it: 'Direzione', en: 'Direction' },
+  newTopic:       { it: 'Nuovo argomento', en: 'New topic' },
+  editTopic:      { it: 'Modifica argomento', en: 'Edit topic' },
+  editTopicHint:  { it: 'Carte, attive, esempi', en: 'Cards, on/off, examples' },
 
   // actions
   add:            { it: 'Aggiungi', en: 'Add' },

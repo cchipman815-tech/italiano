@@ -1,14 +1,16 @@
 'use client'
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { isPathCategory } from '@/lib/paths'
 import SubpageBar from '@/components/SubpageBar'
 import { t } from '@/lib/i18n'
 
 export default function NewSetPage() {
   const router = useRouter()
+  const requested = useSearchParams().get('category')
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
-  const [category, setCategory] = useState('general')
+  const [category, setCategory] = useState(isPathCategory(requested) ? requested : 'general')
   const [saving, setSaving] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {

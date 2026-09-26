@@ -93,8 +93,9 @@ export default function Sheet({
       returnTo?.focus({ preventScroll: true })
     }
     // offsetFor reads the detents prop; re-running on its identity would re-focus mid-open.
+    // isClient: a sheet that starts open has no element until the portal mounts.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open])
+  }, [open, isClient])
 
   function onPointerDown(e: PointerEvent<HTMLDivElement>) {
     if ((e.target as HTMLElement).closest('button, a, input')) return
