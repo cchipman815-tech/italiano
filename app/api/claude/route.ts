@@ -5,7 +5,7 @@ import { getUserIdFromCookie, unauthorized } from '@/lib/api-helpers'
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 export async function POST(req: NextRequest) {
-  const userId = getUserIdFromCookie()
+  const userId = await getUserIdFromCookie()
   if (!userId) return unauthorized()
 
   const { prompt, systemPrompt, maxTokens = 512 } = await req.json() as {

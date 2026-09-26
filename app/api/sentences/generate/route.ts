@@ -83,7 +83,7 @@ Rules:
 - All content must be Prego chapter 1–3 beginner level`
 
 export async function POST(req: NextRequest) {
-  const userId = getUserIdFromCookie()
+  const userId = await getUserIdFromCookie()
   if (!userId) return unauthorized()
 
   const { setId } = await req.json() as { setId?: string }

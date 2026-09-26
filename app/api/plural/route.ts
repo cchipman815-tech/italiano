@@ -12,7 +12,7 @@ Example: "libro" → "libri", "uomo" → "uomini", "città" → "città"
 Respond with plain text only.`
 
 export async function POST(req: NextRequest) {
-  const userId = getUserIdFromCookie()
+  const userId = await getUserIdFromCookie()
   if (!userId) return unauthorized()
 
   const { cardId, italian, english } = await req.json() as {

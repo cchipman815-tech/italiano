@@ -13,7 +13,7 @@ Respond with JSON only: {"italian":"<sentence>","english":"<translation>"}
 No markdown, no explanation, no extra keys.`
 
 export async function POST(req: NextRequest) {
-  const userId = getUserIdFromCookie()
+  const userId = await getUserIdFromCookie()
   if (!userId) return unauthorized()
 
   const { cardId, italian, english } = await req.json() as {
