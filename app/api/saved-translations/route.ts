@@ -17,11 +17,21 @@ export async function GET() {
   return NextResponse.json(data ?? [])
 }
 
+/**
+ * When Salvate undoes a delete it sends the row's original date, so the row
+ * returns to its place. Anything missing, invalid or in the future means now.
+ */
+function restoredDate(raw: unknown): string {
+  const now = Date.now()
+  const at = typeof raw === 'string' ? Date.parse(raw) : NaN
+  return new Date(Number.isFinite(at) && at <= now ? at : now).toISOString()
+}
+
 export async function POST(request: NextRequest) {
   const userId = await getUserIdFromCookie()
   if (!userId) return unauthorized()
 
-  const body = await request.json() as { english?: string; italian?: string }
+  const body = await request.json() as { english?: string; italian?: string; created_at?: string }
   const english = body.english?.trim()
   const italian = body.italian?.trim()
 
@@ -36,7 +46,7 @@ export async function POST(request: NextRequest) {
   const { data, error } = await db
     .from('saved_translations')
     .upsert(
-      { user_id: userId, english, italian, created_at: new Date().toISOString() },
+      { user_id: userId, english, italian, created_at: restoredDate(body.created_at) },
       { onConflict: 'user_id,english,italian' }
     )
     .select()

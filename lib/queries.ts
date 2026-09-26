@@ -7,7 +7,8 @@ import { createServerClient } from './supabase'
 import { buildOverview, type Overview, type RawCard, type RawFormProgress, type RawProgress, type RawSet } from './overview'
 import { getPath, getPathByCategory } from './paths'
 import { todayString } from './srs'
-import type { Card } from './types'
+import type { Card, SavedTranslation } from './types'
+import type { TopicChoice } from './saved'
 
 const CARD_COLUMNS = 'id, set_id, italian, article, chapter, enabled, conjugations, sort_order'
 
@@ -98,4 +99,24 @@ export async function loadSetPath(setId: string) {
   const db = createServerClient()
   const { data } = await db.from('sets').select('category').eq('id', setId).maybeSingle()
   return data ? getPathByCategory(data.category) ?? null : null
+}
+
+/** The user's saved translations, newest first. */
+export async function loadSaved(userId: number): Promise<SavedTranslation[]> {
+  const db = createServerClient()
+  const { data, error } = await db
+    .from('saved_translations')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return data as SavedTranslation[]
+}
+
+/** Every topic a saved translation can be added to, in path order. */
+export async function loadTopicChoices(): Promise<TopicChoice[]> {
+  const db = createServerClient()
+  const { data, error } = await db.from('sets').select('id, title, category, sort_order').order('sort_order')
+  if (error) throw error
+  return (data ?? []).map(({ id, title, category }) => ({ id, title, category }))
 }
