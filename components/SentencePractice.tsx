@@ -1,274 +1,279 @@
 'use client'
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import type { FillBlankQuestion, DialogueQuestion, TranslationQuestion, SentencePracticeQuestion } from '@/app/api/sentences/generate/route'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import type { DialogueQuestion, FillBlankQuestion, SentencePracticeQuestion, TranslationQuestion } from '@/app/api/sentences/generate/route'
+import type { Bilingual } from '@/lib/paths'
+import type { BackLink, Direction } from '@/lib/study'
+import { reducedMotion, tokenMs } from '@/lib/motion'
+import { shuffleArray } from '@/lib/utils'
+import SessionComplete from './SessionComplete'
+import StudyTop from './StudyTop'
+import ChoiceList from './ChoiceList'
+import { Icon } from './StudyIcons'
+import Bi from './Bi'
 
 interface Props {
   setId: string
-  questions: SentencePracticeQuestion[]
-  direction?: 'it-en' | 'en-it'
+  back: BackLink
+  direction?: Direction
 }
 
-function FormatPill({ type }: { type: string }) {
-  const styles: Record<string, string> = {
-    fill_blank:  'bg-blue-100 text-blue-800',
-    dialogue:    'bg-green-100 text-green-800',
-    translation: 'bg-yellow-100 text-yellow-800',
-  }
-  const labels: Record<string, string> = {
-    fill_blank:  'Fill in the blank',
-    dialogue:    'Dialogue',
-    translation: 'Translation',
-  }
-  return (
-    <span className={`inline-block text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full ${styles[type] ?? ''}`}>
-      {labels[type] ?? type}
-    </span>
-  )
+/** A question ready to show: its options in a fixed, shuffled order. */
+interface Prepared {
+  q: SentencePracticeQuestion
+  options: string[]
+  correct: number
 }
 
-function optionClass(opt: string, selected: string | null, correct: string): string {
-  const base = 'w-full border-2 rounded-xl px-4 py-2.5 text-sm font-medium text-left transition-colors'
-  if (!selected) return `${base} border-qz-border text-qz-text bg-white cursor-pointer hover:border-qz-blue hover:text-qz-blue`
-  if (opt === correct)   return `${base} border-green-500 text-green-700 bg-green-50 cursor-default`
-  if (opt === selected)  return `${base} border-red-500 text-red-700 bg-red-50 cursor-default`
-  return `${base} border-qz-border text-qz-secondary bg-white opacity-50 cursor-default`
+function prepare(q: SentencePracticeQuestion, direction: Direction): Prepared {
+  let options: string[]
+  let right: string
+  if (q.type === 'fill_blank') { options = q.options; right = q.blankWord }
+  else if (q.type === 'dialogue') { options = q.options; right = q.correct }
+  else if (direction === 'it-en') { options = q.options_en; right = q.correct_en }
+  else { options = q.options_it; right = q.correct_it }
+  const shuffled = shuffleArray(options)
+  return { q, options: shuffled, correct: shuffled.indexOf(right) }
 }
 
-function FeedbackBar({ correct, grammarNote, onNext }: { correct: boolean; grammarNote?: string; onNext: () => void }) {
-  return (
-    <div className={`flex items-center gap-2 w-full px-4 py-2.5 rounded-xl text-sm font-semibold mt-2 ${
-      correct ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'
-    }`}>
-      <span>{correct ? '✓ Correct!' : '✗ Incorrect'}</span>
-      {grammarNote && <em className="font-normal ml-1">{grammarNote}</em>}
-      <button
-        onClick={onNext}
-        className="ml-auto bg-qz-blue text-white text-xs font-bold px-3 py-1 rounded-full cursor-pointer hover:bg-qz-blue-dark transition-colors whitespace-nowrap"
-      >
-        Next →
-      </button>
-    </div>
-  )
+/**
+ * One request per topic at a time: generating writes the topic's sentences,
+ * so a second mount (React's dev double effects, a quick back-and-forth)
+ * shares the request in flight instead of starting another.
+ */
+const inFlight = new Map<string, Promise<SentencePracticeQuestion[]>>()
+
+function loadSentences(setId: string): Promise<SentencePracticeQuestion[]> {
+  const pending = inFlight.get(setId)
+  if (pending) return pending
+  const request = fetch('/api/sentences/generate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ setId }),
+  })
+    .then(async res => {
+      const data = await res.json().catch(() => ({})) as { questions?: SentencePracticeQuestion[]; error?: string }
+      if (!res.ok || !data.questions?.length) throw new Error(data.error ?? `HTTP ${res.status}`)
+      return data.questions
+    })
+    .finally(() => inFlight.delete(setId))
+  inFlight.set(setId, request)
+  return request
 }
 
-function FillBlankView({ q, selected, onAnswer, onNext }: {
-  q: FillBlankQuestion; selected: string | null; onAnswer: (o: string) => void; onNext: () => void
-}) {
-  const parts = q.italian.split('___')
+const KIND: Record<SentencePracticeQuestion['type'], Bilingual> = {
+  fill_blank: { it: 'Completa', en: 'Fill the blank' },
+  dialogue: { it: 'Dialogo', en: 'Dialogue' },
+  translation: { it: 'Traduci', en: 'Translate' },
+}
+
+function FillBlank({ q, answer }: { q: FillBlankQuestion; answer: string | null }) {
+  const [before, after = ''] = q.italian.split('___')
   return (
     <>
-      <FormatPill type="fill_blank" />
-      <div className="text-xl font-semibold text-qz-text leading-relaxed mt-2 mb-1 text-center">
-        {parts[0]}
-        <span className="inline-block min-w-[80px] h-7 border-b-2 border-qz-blue bg-qz-blue-light rounded-t mx-1 align-middle" />
-        {parts[1]}
-      </div>
-      <p className="text-sm text-qz-muted italic mb-5">{q.english}</p>
-      <div className="grid grid-cols-2 gap-2.5 mb-2 w-full">
-        {q.options.map(opt => (
-          <button
-            key={opt}
-            onClick={() => !selected && onAnswer(opt)}
-            disabled={!!selected}
-            className={optionClass(opt, selected, q.blankWord) + ' text-center'}
-          >
-            {opt}
-          </button>
-        ))}
-      </div>
-      {selected && (
-        <FeedbackBar correct={selected === q.blankWord} grammarNote={q.grammarNote} onNext={onNext} />
-      )}
+      <p className="fq-s ser" lang="it">{before}<u>{answer ?? '___'}</u>{after}</p>
+      <p className="fq-e">{q.english}</p>
     </>
   )
 }
 
-function DialogueView({ q, selected, onAnswer, onNext, translationsVisible, onToggleTranslations }: {
-  q: DialogueQuestion; selected: string | null; onAnswer: (o: string) => void; onNext: () => void
-  translationsVisible: boolean; onToggleTranslations: () => void
-}) {
+function Dialogue({ q, translated, onToggle }: { q: DialogueQuestion; translated: boolean; onToggle: () => void }) {
+  const speakers = [...new Set(q.lines.map(l => l.speaker))]
   return (
     <>
-      <div className="flex items-center justify-between w-full mb-3">
-        <FormatPill type="dialogue" />
-        <button
-          onClick={onToggleTranslations}
-          className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full transition-colors cursor-pointer ${
-            translationsVisible ? 'bg-qz-blue-light text-qz-blue' : 'bg-qz-subtle text-qz-secondary hover:bg-qz-border'
-          }`}
-        >
-          👁 {translationsVisible ? 'Hide translations' : 'Show translations'}
-        </button>
-      </div>
-
-      <div className="bg-qz-subtle border border-qz-border rounded-xl p-4 w-full mb-4 text-left">
+      <div className={`fq-dlg${translated ? ' tr' : ''}`}>
         {q.lines.map((line, i) => (
-          <div key={i} className={`flex gap-2.5 ${i < q.lines.length - 1 ? 'mb-3' : ''}`}>
-            <span className="text-xs font-bold text-qz-secondary uppercase tracking-wide min-w-[52px] pt-0.5 flex-shrink-0">
-              {line.speaker}
-            </span>
-            <div>
-              <p className="text-sm text-qz-text">{line.italian}</p>
-              {translationsVisible && (
-                <p className="text-xs text-qz-muted italic mt-0.5">{line.english}</p>
-              )}
-            </div>
+          <div key={i} className={`fq-b${speakers.indexOf(line.speaker) % 2 ? ' r' : ''}`}>
+            <em>{line.speaker}</em>
+            <span lang="it">{line.italian}</span>
+            <small>{line.english}</small>
           </div>
         ))}
       </div>
-
-      <p className="text-base font-semibold text-qz-text mb-1 w-full text-left">{q.question.italian}</p>
-      {translationsVisible && (
-        <p className="text-xs text-qz-muted italic mb-3 w-full text-left">{q.question.english}</p>
-      )}
-      {!translationsVisible && <div className="mb-3" />}
-
-      <div className="flex flex-col gap-2 w-full mb-2">
-        {q.options.map(opt => (
-          <button
-            key={opt}
-            onClick={() => !selected && onAnswer(opt)}
-            disabled={!!selected}
-            className={optionClass(opt, selected, q.correct)}
-          >
-            {opt}
-          </button>
-        ))}
-      </div>
-      {selected && (
-        <FeedbackBar correct={selected === q.correct} onNext={onNext} />
-      )}
+      <button type="button" className="nm-tog fq-tog" role="switch" aria-checked={translated} onClick={onToggle}>
+        <span className="nm-x"><Bi it="Mostra traduzione" en="Show translation" /></span>
+        <span className="nm-sw2" />
+      </button>
+      <p className="fq-s sm ser" lang="it">{q.question.italian}</p>
+      {translated && <p className="fq-e">{q.question.english}</p>}
     </>
   )
 }
 
-function TranslationView({ q, selected, onAnswer, onNext, direction }: {
-  q: TranslationQuestion; selected: string | null; onAnswer: (o: string) => void; onNext: () => void
-  direction: 'it-en' | 'en-it'
-}) {
-  const prompt  = direction === 'it-en' ? q.italian : q.english
-  const hint    = direction === 'it-en' ? 'Choose the correct English translation ↓' : 'Choose the correct Italian translation ↓'
-  const options = direction === 'it-en' ? q.options_en : q.options_it
-  const correct = direction === 'it-en' ? q.correct_en : q.correct_it
-  return (
+function Translation({ q, direction }: { q: TranslationQuestion; direction: Direction }) {
+  return direction === 'it-en' ? (
     <>
-      <FormatPill type="translation" />
-      <p className="text-xl font-semibold text-qz-text mt-3 mb-1.5 w-full text-left">{prompt}</p>
-      <p className="text-xs text-qz-muted mb-4 w-full text-left">{hint}</p>
-      <div className="flex flex-col gap-2 w-full mb-2">
-        {options.map(opt => (
-          <button
-            key={opt}
-            onClick={() => !selected && onAnswer(opt)}
-            disabled={!!selected}
-            className={optionClass(opt, selected, correct)}
-          >
-            {opt}
-          </button>
-        ))}
-      </div>
-      {selected && (
-        <FeedbackBar correct={selected === correct} grammarNote={q.grammarNote} onNext={onNext} />
-      )}
+      <p className="fq-s ser" lang="it">{q.italian}</p>
+      <p className="fq-e nm-st"><Bi it="Scegli la traduzione inglese" en="Choose the English translation" /></p>
+    </>
+  ) : (
+    <>
+      <p className="fq-s">{q.english}</p>
+      <p className="fq-e nm-st"><Bi it="Scegli la traduzione italiana" en="Choose the Italian translation" /></p>
     </>
   )
 }
 
-export default function SentencePractice({ setId, questions, direction = 'it-en' }: Props) {
-  const router = useRouter()
-  const [index,               setIndex]        = useState(0)
-  const [selected,            setSelected]     = useState<string | null>(null)
-  const [translationsVisible, setTranslations] = useState(false)
-  const [score,               setScore]        = useState(0)
-  const [done,                setDone]         = useState(false)
+/**
+ * Frasi: generated sentences (fill the blank, dialogue, translation). They
+ * load in the browser behind a skeleton; the first time takes a few seconds,
+ * after that they come from the saved set. After each answer a feedback bar
+ * rises with the grammar note and waits for Avanti.
+ */
+export default function SentencePractice({ setId, back, direction = 'it-en' }: Props) {
+  const [state, setState] = useState<{ status: 'loading' } | { status: 'error'; message: string } | { status: 'ready'; questions: Prepared[] }>({ status: 'loading' })
+  const [attempt, setAttempt] = useState(0)
+  const [index, setIndex] = useState(0)
+  const [picked, setPicked] = useState<number | null>(null)
+  const [barOpen, setBarOpen] = useState(false)
+  const [translated, setTranslated] = useState(false)
+  const [swap, setSwap] = useState(false)
+  const [score, setScore] = useState(0)
+  const [done, setDone] = useState(false)
+  const viewRef = useRef<HTMLDivElement>(null)
+  const barRef = useRef<HTMLDivElement>(null)
+  const nextRef = useRef<HTMLButtonElement>(null)
+  const timers = useRef<number[]>([])
 
-  const q = questions[index]
+  useEffect(() => {
+    const pending = timers.current
+    return () => pending.forEach(clearTimeout)
+  }, [])
+  const later = (fn: () => void, ms: number) => { timers.current.push(window.setTimeout(fn, ms)) }
 
-  function isCorrectAnswer(option: string): boolean {
-    if (q.type === 'fill_blank')  return option === q.blankWord
-    if (q.type === 'dialogue')    return option === q.correct
-    if (q.type === 'translation') {
-      const correct = direction === 'it-en' ? q.correct_en : q.correct_it
-      return option === correct
-    }
-    return false
-  }
+  useEffect(() => {
+    let live = true
+    loadSentences(setId)
+      .then(questions => { if (live) setState({ status: 'ready', questions: questions.map(q => prepare(q, direction)) }) })
+      .catch(err => { if (live) setState({ status: 'error', message: err instanceof Error ? err.message : String(err) }) })
+    return () => { live = false }
+  }, [setId, direction, attempt])
 
-  function handleAnswer(option: string) {
-    if (selected) return
-    setSelected(option)
-    if (isCorrectAnswer(option)) setScore(s => s + 1)
-  }
+  const answered = picked != null
+  // The body makes room for the feedback bar, so nothing hides under it.
+  useLayoutEffect(() => {
+    if (barOpen && barRef.current) viewRef.current?.style.setProperty('--fbh', `${barRef.current.offsetHeight}px`)
+  }, [barOpen, index])
 
-  function next() {
-    setSelected(null)
-    setTranslations(false)
-    if (index + 1 >= questions.length) setDone(true)
-    else setIndex(i => i + 1)
-  }
+  const retry = useCallback(() => {
+    setState({ status: 'loading' })
+    setAttempt(a => a + 1)
+  }, [])
 
-  if (done) {
+  if (state.status === 'loading') {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6 text-center">
-        <div className="text-5xl">🎉</div>
-        <h2 className="text-2xl font-bold text-qz-text">Session Complete!</h2>
-        <p className="text-lg text-qz-secondary">
-          <span className="font-bold text-qz-blue">{score}</span> / {questions.length} correct
-        </p>
-        <div className="flex gap-3 mt-2">
-          <button
-            onClick={() => { setIndex(0); setSelected(null); setScore(0); setDone(false) }}
-            className="px-6 py-2.5 bg-qz-blue text-white rounded-full font-semibold hover:bg-qz-blue-dark cursor-pointer transition-colors"
-          >
-            Try Again
-          </button>
-          <button
-            onClick={() => router.push(`/sets/${setId}`)}
-            className="px-6 py-2.5 border-2 border-qz-border rounded-full text-qz-secondary font-medium hover:border-qz-blue hover:text-qz-blue cursor-pointer transition-colors"
-          >
-            Back to Set
-          </button>
+      <div className="st-view">
+        <StudyTop back={back} count={<span className="nm-x"><Bi it="Frasi" en="Sentences" /></span>} progress={0} />
+        <div className="fq-load" role="status">
+          <span className="nm-eb nm-x"><Bi it="Preparo le frasi…" en="Preparing sentences…" /></span>
+          <i className="sk big" /><i className="sk w90" /><i className="sk w60" /><i className="sk w40" />
+          <small className="nm-st"><Bi it="La prima volta ci vuole qualche secondo. Poi restano salvate." en="The first time takes a few seconds. After that they're saved." /></small>
         </div>
       </div>
     )
   }
 
-  return (
-    <div className="flex flex-col items-center gap-4 py-6">
-      <div className="w-full max-w-sm">
-        <div className="flex justify-between text-sm text-qz-secondary mb-2">
-          <span>Question {index + 1} of {questions.length}</span>
-          <span className="text-qz-blue font-medium">{score} correct</span>
-        </div>
-        <div className="w-full bg-qz-subtle rounded-full h-1.5">
-          <div
-            className="bg-qz-blue h-1.5 rounded-full transition-all"
-            style={{ width: `${(index / questions.length) * 100}%` }}
-          />
+  if (state.status === 'error') {
+    return (
+      <div className="st-view">
+        <StudyTop back={back} count={<span className="nm-x"><Bi it="Frasi" en="Sentences" /></span>} />
+        <div className="nm-empty" role="alert">
+          <span className="orb bad"><Icon name="alert" size={26} /></span>
+          <h2 className="nm-x"><Bi it="Impossibile preparare le frasi" en="Unable to prepare sentences" /></h2>
+          <p className="nm-st"><Bi k="somethingWrong" /></p>
+          <button type="button" className="nm-ghost" onClick={retry}><Bi k="tryAgain" /></button>
         </div>
       </div>
+    )
+  }
 
-      <div
-        className="w-full max-w-sm bg-white border-2 border-qz-border rounded-2xl p-6 flex flex-col items-center"
-        style={{ boxShadow: 'var(--qz-shadow-card)' }}
-      >
-        {q.type === 'fill_blank' && (
-          <FillBlankView q={q} selected={selected} onAnswer={handleAnswer} onNext={next} />
+  const questions = state.questions
+  const { q, options, correct } = questions[index]
+
+  function pick(k: number) {
+    if (picked != null || swap) return
+    setPicked(k)
+    setBarOpen(true)
+    if (k === correct) setScore(s => s + 1)
+    later(() => nextRef.current?.focus({ preventScroll: true }), tokenMs('--d-medium', 400))
+  }
+
+  function next() {
+    setBarOpen(false)
+    if (index + 1 >= questions.length) {
+      later(() => setDone(true), reducedMotion() ? 0 : tokenMs('--d-small', 250))
+      return
+    }
+    setSwap(true)
+    later(() => {
+      setIndex(i => i + 1)
+      setPicked(null)
+      setTranslated(false)
+      setSwap(false)
+    }, reducedMotion() ? 0 : tokenMs('--d-small', 250))
+  }
+
+  function again() {
+    setState({ status: 'ready', questions: questions.map(p => prepare(p.q, direction)) })
+    setIndex(0)
+    setPicked(null)
+    setScore(0)
+    setDone(false)
+  }
+
+  if (done) {
+    return (
+      <SessionComplete
+        mode="sentences"
+        result={{ right: score, wrong: questions.length - score, total: questions.length }}
+        back={back}
+        onAgain={again}
+      />
+    )
+  }
+
+  const right = picked === correct
+  const note = q.type !== 'dialogue' ? q.grammarNote : null
+  const italianOptions = q.type !== 'translation' || direction === 'en-it'
+
+  return (
+    <div ref={viewRef} className={`st-view fq-view${barOpen ? ' fb-on' : ''}`}>
+      <StudyTop
+        back={back}
+        count={<span className="tab-n nm-x"><Bi it="Frasi" en="Sentences" /> · {index + 1} / {questions.length}</span>}
+        progress={(index + (answered ? 1 : 0)) / questions.length}
+      />
+      <div className={`fq-body st-pad${swap ? ' swap' : ''}`}>
+        <div className="fq-q">
+          <span className="fq-kind nm-x"><Bi {...KIND[q.type]} /></span>
+          {q.type === 'fill_blank' && <FillBlank q={q} answer={answered ? options[correct] : null} />}
+          {q.type === 'dialogue' && <Dialogue q={q} translated={translated} onToggle={() => setTranslated(t => !t)} />}
+          {q.type === 'translation' && <Translation q={q} direction={direction} />}
+        </div>
+        <ChoiceList
+          key={index}
+          className={`nm-opts fq-opts nm-x${q.type === 'fill_blank' ? ' g2' : ''}`}
+          choices={options.map(o => ({ key: o, label: o, lang: italianOptions ? 'it' : undefined }))}
+          correct={correct}
+          picked={picked}
+          onPick={pick}
+        />
+      </div>
+
+      <div ref={barRef} className={`fq-fb${answered ? ` ${right ? 'ok' : 'no'}` : ''}${barOpen ? ' on' : ''}`} inert={!barOpen}>
+        <div className="h">
+          <Icon name={right ? 'check' : 'x'} size={20} strokeWidth={2.6} />
+          <span className="nm-x">{right ? <Bi it="Giusto" en="Correct" /> : <Bi it="Non proprio" en="Not quite" />}</span>
+        </div>
+        {(note || (answered && !right)) && (
+          <p>
+            {!right && <><span className="nm-x"><Bi it="Risposta giusta" en="Right answer" /></span>: <b lang={italianOptions ? 'it' : undefined}>{options[correct]}</b>{note ? ' · ' : ''}</>}
+            {note}
+          </p>
         )}
-        {q.type === 'dialogue' && (
-          <DialogueView
-            q={q}
-            selected={selected}
-            onAnswer={handleAnswer}
-            onNext={next}
-            translationsVisible={translationsVisible}
-            onToggleTranslations={() => setTranslations(v => !v)}
-          />
-        )}
-        {q.type === 'translation' && (
-          <TranslationView q={q} selected={selected} onAnswer={handleAnswer} onNext={next} direction={direction} />
-        )}
+        <button ref={nextRef} type="button" className="nm-cta on-ac" onClick={next}>
+          <span className="nm-st"><Bi k="next" /></span>
+          <span className="orb"><Icon name="arrow" strokeWidth={2.2} /></span>
+        </button>
       </div>
     </div>
   )

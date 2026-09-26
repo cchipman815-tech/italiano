@@ -7,7 +7,8 @@ import { createServerClient } from './supabase'
 import { buildOverview, type Overview, type RawCard, type RawFormProgress, type RawProgress, type RawSet } from './overview'
 import { getPath, getPathByCategory } from './paths'
 import { todayString } from './srs'
-import type { Card, SavedTranslation } from './types'
+import type { Card, Pronoun, SavedTranslation } from './types'
+import { reviewItems, type CardPlace, type ReviewItem } from './study'
 import type { TopicChoice } from './saved'
 
 const CARD_COLUMNS = 'id, set_id, italian, article, chapter, enabled, conjugations, sort_order'
@@ -48,12 +49,19 @@ export interface ReviewScope {
 }
 
 export interface ReviewDeck {
-  cards: Card[]
+  /** Due cards, then due conjugation forms (the page shuffles them together). */
+  items: ReviewItem[]
+  /** Path and topic of every set an item comes from, for the card's tag. */
+  places: Record<string, CardPlace>
   /** What the deck covers, for the back button: a topic title, a path, or everything. */
   scope: { kind: 'set'; id: string; title: string } | { kind: 'path'; slug: string } | { kind: 'all' }
 }
 
-/** Enabled cards due today or earlier (never-reviewed cards are new, not due), within a scope. */
+/**
+ * Enabled cards due today or earlier (never-reviewed cards are new, not due),
+ * plus conjugation forms due today whose verb is enabled, within a scope.
+ * These are exactly what Oggi's due number counts.
+ */
 export async function loadReviewDeck(userId: number, scope: ReviewScope): Promise<ReviewDeck | null> {
   const db = createServerClient()
   const today = todayString()
@@ -73,25 +81,92 @@ export async function loadReviewDeck(userId: number, scope: ReviewScope): Promis
     deckScope = { kind: 'path', slug: path.slug }
   }
 
-  const { data: due, error } = await db
-    .from('progress')
-    .select('card_id')
-    .eq('user_id', userId)
-    .not('next_review_at', 'is', null)
-    .lte('next_review_at', today)
-    .range(0, 9999)
-  if (error) throw error
-  const dueIds = (due ?? []).map(p => p.card_id)
-  if (dueIds.length === 0 || setIds?.length === 0) return { cards: [], scope: deckScope }
+  const [dueCards, dueForms] = await Promise.all([
+    db.from('progress')
+      .select('card_id')
+      .eq('user_id', userId)
+      .not('next_review_at', 'is', null)
+      .lte('next_review_at', today)
+      .range(0, 9999),
+    loadDueForms(userId, today),
+  ])
+  if (dueCards.error) throw dueCards.error
+  const dueIds = new Set((dueCards.data ?? []).map(p => p.card_id as string))
+  const ids = [...new Set([...dueIds, ...dueForms.map(f => f.card_id)])]
+  if (ids.length === 0 || setIds?.length === 0) return { items: [], places: {}, scope: deckScope }
 
-  let query = db.from('cards').select('*').in('id', dueIds)
+  let query = db.from('cards').select('*').in('id', ids)
   if (setIds) query = query.in('set_id', setIds)
   if (scope.cap != null) query = query.eq('chapter', scope.cap)
   const { data: cards, error: cardsError } = await query
   if (cardsError) throw cardsError
 
-  const enabled = ((cards ?? []) as Card[]).filter(c => c.enabled !== false)
-  return { cards: enabled, scope: deckScope }
+  const items = reviewItems((cards ?? []) as Card[], dueIds, dueForms)
+
+  return { items, places: await loadPlaces([...new Set(items.map(i => i.card.set_id))]), scope: deckScope }
+}
+
+/** Conjugation forms due today or earlier. Empty if migration 010 hasn't run. */
+async function loadDueForms(userId: number, today: string): Promise<{ card_id: string; pronoun: Pronoun }[]> {
+  const db = createServerClient()
+  const { data, error } = await db
+    .from('conjugation_progress')
+    .select('card_id, pronoun')
+    .eq('user_id', userId)
+    .not('next_review_at', 'is', null)
+    .lte('next_review_at', today)
+    .range(0, 9999)
+  return error ? [] : ((data ?? []) as { card_id: string; pronoun: Pronoun }[])
+}
+
+async function loadPlaces(setIds: string[]): Promise<Record<string, CardPlace>> {
+  if (setIds.length === 0) return {}
+  const db = createServerClient()
+  const { data, error } = await db.from('sets').select('id, title, category').in('id', setIds)
+  if (error) throw error
+  return Object.fromEntries((data ?? []).map(s => [s.id, placeOf(s)]))
+}
+
+function placeOf(set: { title: string; category: string }): CardPlace {
+  return { path: getPathByCategory(set.category)?.name ?? null, topic: set.title }
+}
+
+export interface StudySet {
+  id: string
+  title: string
+  category: string
+  /** Enabled cards, in the topic's order. */
+  cards: Card[]
+  place: CardPlace
+  /** Where a study screen's back button goes: the path page with this topic's sheet open. */
+  back: { href: string; label: string }
+}
+
+/** A topic and its enabled cards, for a study mode. Null if the set doesn't exist. */
+export async function loadStudySet(setId: string): Promise<StudySet | null> {
+  const db = createServerClient()
+  const [{ data: set }, { data: cards, error }] = await Promise.all([
+    db.from('sets').select('id, title, category').eq('id', setId).maybeSingle(),
+    db.from('cards').select('*').eq('set_id', setId).order('sort_order', { ascending: true }),
+  ])
+  if (!set) return null
+  if (error) throw error
+  const path = getPathByCategory(set.category)
+  return {
+    id: set.id,
+    title: set.title,
+    category: set.category,
+    cards: ((cards ?? []) as Card[]).filter(c => c.enabled !== false),
+    place: placeOf(set),
+    back: { href: path ? `/learn/${path.slug}?topic=${set.id}` : `/sets/${set.id}`, label: set.title },
+  }
+}
+
+/** Verb cards among `cardIds` with at least one form due today or earlier. */
+export async function loadCardsWithDueForms(userId: number, cardIds: string[]): Promise<Set<string>> {
+  if (cardIds.length === 0) return new Set()
+  const ids = new Set(cardIds)
+  return new Set((await loadDueForms(userId, todayString())).map(f => f.card_id).filter(id => ids.has(id)))
 }
 
 /** Where a set lives in the Notte structure: its path, if its category is one. */

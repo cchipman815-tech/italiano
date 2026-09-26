@@ -148,7 +148,7 @@ export default function CardEditor({ card, onSave, onDelete }: Props) {
             {/* Italian word */}
             <span className="flex-1 font-medium text-qz-text flex items-center gap-1.5 min-w-0">
               {card.italian}
-              <GenderBadge gender={card.gender} size="sm" />
+              <GenderBadge gender={card.gender} article={card.article} />
               <SpeakButton text={card.italian} size="sm" />
             </span>
 

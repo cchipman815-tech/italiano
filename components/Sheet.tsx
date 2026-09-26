@@ -8,18 +8,12 @@ import {
   type ReactNode,
 } from 'react'
 import { createPortal } from 'react-dom'
+import { tokenMs } from '@/lib/motion'
 
 const FOCUSABLE = 'input:not([disabled]), textarea:not([disabled]), select:not([disabled]), .nm-scrl button:not([disabled]), button:not([disabled]), a[href]'
 const DISMISS_FRACTION = 0.3
 
 const subscribeNever = () => () => {}
-
-/** A motion token from :root in ms (e.g. --d-medium → 400, or 150 under reduced motion). */
-function tokenMs(name: string, fallback: number): number {
-  const raw = getComputedStyle(document.documentElement).getPropertyValue(name).trim()
-  const ms = parseFloat(raw)
-  return Number.isFinite(ms) ? ms : fallback
-}
 
 /**
  * A bottom sheet over a dim. It rises over --d-medium (decel) and leaves over

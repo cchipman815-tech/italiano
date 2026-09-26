@@ -16,7 +16,7 @@ function backFor(scope: ReviewDeck['scope']): { href: string; label: Bilingual |
   return { href: '/home', label: t('today') }
 }
 
-/** Ripasso: every enabled card due today, optionally within a topic (?set=), a path (?path=) or a chapter (?cap=). */
+/** Ripasso: every enabled card and conjugation form due today, optionally within a topic (?set=), a path (?path=) or a chapter (?cap=). */
 export default async function ReviewPage({
   searchParams,
 }: {
@@ -32,9 +32,8 @@ export default async function ReviewPage({
   if (!deck) notFound()
 
   const back = backFor(deck.scope)
-  const backLabel = typeof back.label === 'string' ? back.label : back.label.it
 
-  if (deck.cards.length === 0) {
+  if (deck.items.length === 0) {
     return (
       <>
         <SubpageBar back={back} />
@@ -48,12 +47,6 @@ export default async function ReviewPage({
     )
   }
 
-  return (
-    <>
-      <SubpageBar back={back} trailing={cap != null ? `cap. ${cap}` : undefined} />
-      <div className="max-w-4xl mx-auto px-4">
-        <ReviewStudy cards={shuffleArray(deck.cards)} backHref={back.href} backLabel={backLabel} />
-      </div>
-    </>
-  )
+  // Shuffled here, not in the client component, so server and client render the same deck.
+  return <ReviewStudy key={`${set ?? ''}|${path ?? ''}|${cap ?? ''}`} items={shuffleArray(deck.items)} places={deck.places} back={back} capLabel={cap != null ? `cap. ${cap}` : undefined} />
 }

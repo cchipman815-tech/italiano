@@ -7,6 +7,7 @@ import NavLink from './NavLink'
 import { useShell } from './Shell'
 import { Icon } from './StudyIcons'
 import Bi from './Bi'
+import { tokenMs, reducedMotion } from '@/lib/motion'
 
 export interface ImparaPath {
   slug: PathSlug
@@ -19,13 +20,6 @@ export interface ImparaPath {
 function countFor(path: ImparaPath, cap: number | null) {
   return cap == null ? path.active : path.chapters[cap] ?? 0
 }
-
-function tokenMs(name: string, fallback: number) {
-  const ms = parseFloat(getComputedStyle(document.documentElement).getPropertyValue(name))
-  return Number.isFinite(ms) ? ms : fallback
-}
-
-const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 /**
  * Impara: the four paths, filterable by Prego chapter. Cards with nothing in

@@ -10,6 +10,7 @@ import { useShell } from './Shell'
 import { SpeakOrb } from './Speak'
 import { Icon } from './StudyIcons'
 import Bi from './Bi'
+import { tokenMs, reducedMotion } from '@/lib/motion'
 
 /** A saved row, with a key that survives a delete and undo (the server gives the restored row a new id). */
 interface Row extends SavedTranslation {
@@ -17,13 +18,6 @@ interface Row extends SavedTranslation {
 }
 
 const SWIPE_DELETE = 0.35
-
-function tokenMs(name: string, fallback: number) {
-  const ms = parseFloat(getComputedStyle(document.documentElement).getPropertyValue(name))
-  return Number.isFinite(ms) ? ms : fallback
-}
-
-const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches
 
 const byNewest = (a: Row, b: Row) => b.created_at.localeCompare(a.created_at)
 
