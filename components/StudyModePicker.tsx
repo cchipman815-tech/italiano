@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import Link from 'next/link'
+import NavLink from '@/components/NavLink'
 import {
   FlashcardIcon,
   ConjugationIcon,
@@ -50,7 +50,7 @@ export default function StudyModePicker({ setId, canStudyMulti, dueCount, hasCon
       </div>
 
       {/* Review Due Cards — prominent at top */}
-      <Link
+      <NavLink
         href={`/sets/${setId}/review`}
         className="flex items-center gap-4 bg-white border-2 border-qz-blue rounded-2xl p-5 hover:bg-qz-blue-light transition-colors"
         style={{ boxShadow: 'var(--qz-shadow-sm)' }}
@@ -65,12 +65,12 @@ export default function StudyModePicker({ setId, canStudyMulti, dueCount, hasCon
             {dueCount} due
           </span>
         )}
-      </Link>
+      </NavLink>
 
       {/* Core Study section */}
       <p className="text-xs font-bold uppercase tracking-wider text-qz-secondary pt-4">Core Study</p>
 
-      <Link
+      <NavLink
         href={`/sets/${setId}/flashcard?direction=${direction}`}
         className="flex items-center gap-4 bg-white border-2 border-qz-border rounded-2xl p-5 hover:border-qz-blue transition-colors"
         style={{ boxShadow: 'var(--qz-shadow-sm)' }}
@@ -80,10 +80,10 @@ export default function StudyModePicker({ setId, canStudyMulti, dueCount, hasCon
           <div className="font-semibold text-qz-text">Flashcards</div>
           <div className="text-sm text-qz-secondary">Flip cards, mark what you know</div>
         </div>
-      </Link>
+      </NavLink>
 
       {hasConjugations && (
-        <Link
+        <NavLink
           href={`/sets/${setId}/conjugation?direction=${direction}`}
           className="flex items-center gap-4 bg-white border-2 border-qz-border rounded-2xl p-5 hover:border-qz-blue transition-colors"
           style={{ boxShadow: 'var(--qz-shadow-sm)' }}
@@ -93,10 +93,10 @@ export default function StudyModePicker({ setId, canStudyMulti, dueCount, hasCon
             <div className="font-semibold text-qz-text">Conjugations</div>
             <div className="text-sm text-qz-secondary">Drill every verb form as a flashcard</div>
           </div>
-        </Link>
+        </NavLink>
       )}
 
-      <Link
+      <NavLink
         href={`/sets/${setId}/sentence-practice?direction=${direction}`}
         className="flex items-center gap-4 bg-white border-2 border-qz-border rounded-2xl p-5 hover:border-qz-blue transition-colors"
         style={{ boxShadow: 'var(--qz-shadow-sm)' }}
@@ -106,13 +106,13 @@ export default function StudyModePicker({ setId, canStudyMulti, dueCount, hasCon
           <div className="font-semibold text-qz-text">Sentences</div>
           <div className="text-sm text-qz-secondary">Fill-in-blank, dialogue, and translation</div>
         </div>
-      </Link>
+      </NavLink>
 
       {/* Practice section */}
       <p className="text-xs font-bold uppercase tracking-wider text-qz-secondary pt-4">Practice</p>
 
       {canStudyMulti ? (
-        <Link
+        <NavLink
           href={`/sets/${setId}/quiz`}
           className="flex items-center gap-4 bg-white border-2 border-qz-border rounded-2xl p-5 hover:border-qz-blue transition-colors"
           style={{ boxShadow: 'var(--qz-shadow-sm)' }}
@@ -122,7 +122,7 @@ export default function StudyModePicker({ setId, canStudyMulti, dueCount, hasCon
             <div className="font-semibold text-qz-text">Quiz</div>
             <div className="text-sm text-qz-secondary">Multiple choice questions</div>
           </div>
-        </Link>
+        </NavLink>
       ) : (
         <div className="flex items-center gap-4 bg-qz-subtle border-2 border-qz-border rounded-2xl p-5 opacity-50 cursor-not-allowed">
           <span className="text-qz-muted"><QuizIcon /></span>
@@ -134,7 +134,7 @@ export default function StudyModePicker({ setId, canStudyMulti, dueCount, hasCon
       )}
 
       {canStudyMulti ? (
-        <Link
+        <NavLink
           href={`/sets/${setId}/listening`}
           className="flex items-center gap-4 bg-white border-2 border-qz-border rounded-2xl p-5 hover:border-qz-blue transition-colors"
           style={{ boxShadow: 'var(--qz-shadow-sm)' }}
@@ -144,7 +144,7 @@ export default function StudyModePicker({ setId, canStudyMulti, dueCount, hasCon
             <div className="font-semibold text-qz-text">Listening</div>
             <div className="text-sm text-qz-secondary">Hear Italian, pick the meaning</div>
           </div>
-        </Link>
+        </NavLink>
       ) : (
         <div className="flex items-center gap-4 bg-qz-subtle border-2 border-qz-border rounded-2xl p-5 opacity-50 cursor-not-allowed">
           <span className="text-qz-muted"><ListeningIcon /></span>
@@ -155,12 +155,12 @@ export default function StudyModePicker({ setId, canStudyMulti, dueCount, hasCon
         </div>
       )}
 
-      <Link
+      <NavLink
         href={`/sets/${setId}/edit`}
         className="text-center py-3 text-sm font-medium text-qz-secondary border-2 border-qz-border rounded-2xl hover:border-qz-blue hover:text-qz-blue transition-colors mt-8"
       >
         Edit this set
-      </Link>
+      </NavLink>
     </div>
   )
 }

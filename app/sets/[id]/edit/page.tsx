@@ -1,9 +1,8 @@
 'use client'
 import { useState, useEffect, useMemo } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import Link from 'next/link'
 import CardEditor from '@/components/CardEditor'
-import AppNav from '@/components/AppNav'
+import SubpageBar from '@/components/SubpageBar'
 import type { Card, Set as FlashSet } from '@/lib/types'
 
 interface VerbGroup {
@@ -192,11 +191,8 @@ export default function EditSetPage() {
 
   return (
     <>
-    <AppNav />
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <Link href={`/sets/${id}`} className="text-sm text-qz-secondary hover:text-qz-text mb-6 inline-block transition-colors">
-        ← Back to set
-      </Link>
+    <SubpageBar back={{ href: `/sets/${id}`, label: set.title }} />
+    <div className="max-w-4xl mx-auto px-4 py-4">
 
       <h1 className="text-2xl font-bold text-qz-text mb-6">Edit Set</h1>
 

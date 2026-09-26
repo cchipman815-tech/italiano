@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import NavLink from '@/components/NavLink'
 import type { SetWithProgress } from '@/lib/types'
 import { calculateProgress } from '@/lib/utils'
 
@@ -24,18 +24,18 @@ export default function SetCard({ set }: Props) {
         />
       </div>
       <div className="flex gap-2">
-        <Link
+        <NavLink
           href={`/sets/${set.id}`}
           className="flex-1 text-center py-2 bg-qz-blue text-white text-sm font-semibold rounded-full hover:bg-qz-blue-dark transition-colors"
         >
           Study
-        </Link>
-        <Link
+        </NavLink>
+        <NavLink
           href={`/sets/${set.id}/edit`}
           className="px-4 py-2 text-sm font-medium text-qz-secondary border-2 border-qz-border rounded-full hover:border-qz-blue hover:text-qz-blue transition-colors"
         >
           Edit
-        </Link>
+        </NavLink>
       </div>
     </div>
   )

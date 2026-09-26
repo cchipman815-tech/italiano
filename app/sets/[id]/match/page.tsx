@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
+import SubpageBar from '@/components/SubpageBar'
 import MatchStudy from '@/components/MatchStudy'
 import { isValidUserId } from '@/lib/users'
 import type { SetWithCards } from '@/lib/types'
@@ -26,24 +27,24 @@ export default async function MatchPage({
 
   if (data.cards.length < 4) {
     return (
-      <div className="max-w-xl mx-auto px-4 py-16 text-center">
-        <p className="text-qz-secondary mb-4">Need at least 4 cards to use Match mode.</p>
-        <Link href={`/sets/${id}/edit`} className="text-qz-blue hover:underline">
-          Add more cards
-        </Link>
-      </div>
+      <>
+        <SubpageBar back={{ href: `/sets/${id}`, label: data.title }} />
+        <div className="max-w-xl mx-auto px-4 py-16 text-center">
+          <p className="text-qz-secondary mb-4">Need at least 4 cards to use Match mode.</p>
+          <Link href={`/sets/${id}/edit`} className="text-qz-blue hover:underline">
+            Add more cards
+          </Link>
+        </div>
+      </>
     )
   }
 
   return (
-    <div className="max-w-xl mx-auto px-4 py-6">
-      <div className="flex items-center justify-between mb-2">
-        <Link href={`/sets/${id}`} className="text-sm text-qz-secondary hover:text-qz-text transition-colors">
-          ← {data.title}
-        </Link>
-        <span className="text-sm font-medium text-qz-text">Match</span>
+    <>
+      <SubpageBar back={{ href: `/sets/${id}`, label: data.title }} trailing={<span lang="it">Abbina</span>} />
+      <div className="max-w-xl mx-auto px-4 py-6">
+        <MatchStudy setId={id} cards={data.cards} />
       </div>
-      <MatchStudy setId={id} cards={data.cards} />
-    </div>
+    </>
   )
 }

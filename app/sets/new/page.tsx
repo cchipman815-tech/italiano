@@ -1,8 +1,8 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import AppNav from '@/components/AppNav'
+import SubpageBar from '@/components/SubpageBar'
+import { t } from '@/lib/i18n'
 
 export default function NewSetPage() {
   const router = useRouter()
@@ -32,11 +32,8 @@ export default function NewSetPage() {
 
   return (
     <>
-    <AppNav />
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <Link href="/home" className="text-sm text-qz-secondary hover:text-qz-text mb-6 inline-block transition-colors">
-        ← Cancel
-      </Link>
+    <SubpageBar back={{ href: '/learn', label: t('learn') }} />
+    <div className="max-w-4xl mx-auto px-4 py-4">
       <h1 className="text-2xl font-bold text-qz-text mb-6">New Set</h1>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>

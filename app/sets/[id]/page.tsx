@@ -1,12 +1,12 @@
 import { cookies } from 'next/headers'
-import Link from 'next/link'
 import { redirect, notFound } from 'next/navigation'
-import { isValidUserId, getUserById } from '@/lib/users'
+import { isValidUserId } from '@/lib/users'
 import { calculateProgress } from '@/lib/utils'
 import { isDueToday } from '@/lib/srs'
 import type { SetWithCards } from '@/lib/types'
 import StudyModePicker from '@/components/StudyModePicker'
-import AppNav from '@/components/AppNav'
+import SubpageBar from '@/components/SubpageBar'
+import { t } from '@/lib/i18n'
 
 async function getSet(id: string, userId: number) {
   const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/sets/${id}`, {
@@ -26,8 +26,6 @@ export default async function SetDetailPage({
   const raw = cookieStore.get('userId')?.value
   const userId = raw ? parseInt(raw, 10) : null
   if (!userId || !isValidUserId(userId)) redirect('/login')
-
-  const user = getUserById(userId)
   const { id } = await params
   const set = await getSet(id, userId)
   if (!set) notFound()
@@ -47,13 +45,8 @@ export default async function SetDetailPage({
 
   return (
     <>
-      <AppNav userInitial={user.name[0]} />
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <nav className="text-sm text-qz-secondary mb-6">
-          <Link href="/home" className="hover:text-qz-text transition-colors">Home</Link>
-          <span className="mx-1.5">›</span>
-          <span className="text-qz-text font-medium">{set.title}</span>
-        </nav>
+      <SubpageBar back={{ href: '/learn', label: t('learn') }} />
+      <div className="max-w-4xl mx-auto px-4 py-4">
 
         <h1 className="text-2xl font-bold text-qz-text mb-1">{set.title}</h1>
         {set.description && <p className="text-qz-secondary mb-3">{set.description}</p>}

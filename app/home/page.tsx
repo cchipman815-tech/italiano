@@ -2,7 +2,8 @@ import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import SetCard from '@/components/SetCard'
-import AppNav from '@/components/AppNav'
+import LargeTitle from '@/components/LargeTitle'
+import { t } from '@/lib/i18n'
 import TranslatorWidget from '@/components/TranslatorWidget'
 import SavedTranslationsCard from '@/components/SavedTranslationsCard'
 import { isValidUserId, getUserById } from '@/lib/users'
@@ -38,8 +39,8 @@ export default async function HomePage() {
 
   return (
     <>
-      <AppNav userInitial={user.name[0]} />
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <LargeTitle title={t('today')} sub={<span>{user.name}</span>} />
+      <div className="max-w-4xl mx-auto px-4 py-6">
         <TranslatorWidget />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

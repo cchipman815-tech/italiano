@@ -2,9 +2,9 @@ import { cookies } from 'next/headers'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import ReviewStudy from '@/components/ReviewStudy'
-import AppNav from '@/components/AppNav'
+import SubpageBar from '@/components/SubpageBar'
 import { ReviewIcon } from '@/components/StudyIcons'
-import { isValidUserId, getUserById } from '@/lib/users'
+import { isValidUserId } from '@/lib/users'
 import { isDueToday } from '@/lib/srs'
 import type { SetWithCards } from '@/lib/types'
 
@@ -17,8 +17,6 @@ export default async function ReviewPage({
   const raw = cookieStore.get('userId')?.value
   const userId = raw ? parseInt(raw, 10) : null
   if (!userId || !isValidUserId(userId)) redirect('/login')
-
-  const user = getUserById(userId)
   const { id } = await params
   const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/sets/${id}`, {
     headers: { Cookie: `userId=${userId}` },
@@ -38,7 +36,7 @@ export default async function ReviewPage({
   if (dueCards.length === 0) {
     return (
       <>
-        <AppNav userInitial={user.name[0]} />
+        <SubpageBar back={{ href: `/sets/${id}`, label: data.title }} />
         <div className="max-w-4xl mx-auto px-4 py-16 text-center">
           <div className="text-5xl mb-4">🎉</div>
           <h2 className="text-xl font-bold text-qz-text mb-2">All caught up!</h2>
@@ -51,15 +49,8 @@ export default async function ReviewPage({
 
   return (
     <>
-      <AppNav userInitial={user.name[0]} />
+      <SubpageBar back={{ href: `/sets/${id}`, label: data.title }} />
       <div className="max-w-4xl mx-auto px-4 py-6">
-        <nav className="text-sm text-qz-secondary mb-4">
-          <Link href="/home" className="hover:text-qz-text transition-colors">Home</Link>
-          <span className="mx-1.5">›</span>
-          <Link href={`/sets/${id}`} className="hover:text-qz-text transition-colors">{data.title}</Link>
-          <span className="mx-1.5">›</span>
-          <span>Review</span>
-        </nav>
         <div className="flex items-center gap-3 mb-4">
           <span className="text-qz-blue"><ReviewIcon size={24} /></span>
           <h1 className="text-2xl font-bold text-qz-text">Review Due Cards</h1>

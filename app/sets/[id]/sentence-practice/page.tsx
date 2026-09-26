@@ -1,9 +1,9 @@
 import { cookies } from 'next/headers'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
-import { isValidUserId, getUserById } from '@/lib/users'
+import { isValidUserId } from '@/lib/users'
 import SentencePractice from '@/components/SentencePractice'
-import AppNav from '@/components/AppNav'
+import SubpageBar from '@/components/SubpageBar'
 import { SentenceIcon } from '@/components/StudyIcons'
 import type { SetWithCards } from '@/lib/types'
 import type { SentencePracticeQuestion } from '@/app/api/sentences/generate/route'
@@ -19,8 +19,6 @@ export default async function SentencePracticePage({
   const raw = cookieStore.get('userId')?.value
   const userId = raw ? parseInt(raw, 10) : null
   if (!userId || !isValidUserId(userId)) redirect('/login')
-
-  const user = getUserById(userId)
   const { id } = await params
   const { direction: dirParam } = await searchParams
   const direction = dirParam === 'en-it' ? 'en-it' : 'it-en'
@@ -45,7 +43,7 @@ export default async function SentencePracticePage({
     const err = await genRes.json().catch(() => ({ error: 'Unknown error' }))
     return (
       <>
-        <AppNav userInitial={user.name[0]} />
+        <SubpageBar back={{ href: `/sets/${id}`, label: setData.title }} />
         <div className="max-w-4xl mx-auto px-4 py-16 text-center">
           <p className="text-qz-secondary mb-2">Could not generate practice questions.</p>
           <p className="text-sm text-qz-muted mb-6">{err.error}</p>
@@ -59,15 +57,8 @@ export default async function SentencePracticePage({
 
   return (
     <>
-      <AppNav userInitial={user.name[0]} />
+      <SubpageBar back={{ href: `/sets/${id}`, label: setData.title }} />
       <div className="max-w-4xl mx-auto px-4 py-6">
-        <nav className="text-sm text-qz-secondary mb-4">
-          <Link href="/home" className="hover:text-qz-text transition-colors">Home</Link>
-          <span className="mx-1.5">›</span>
-          <Link href={`/sets/${id}`} className="hover:text-qz-text transition-colors">{setData.title}</Link>
-          <span className="mx-1.5">›</span>
-          <span>Sentences</span>
-        </nav>
         <div className="flex items-center gap-3 mb-4">
           <span className="text-qz-blue"><SentenceIcon size={24} /></span>
           <h1 className="text-2xl font-bold text-qz-text">Sentences</h1>
