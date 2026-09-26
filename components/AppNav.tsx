@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useSyncExternalStore } from 'react'
 import Link from 'next/link'
 
 const USER_INITIALS: Record<string, string> = { '1': 'C', '2': 'J' }
@@ -9,25 +9,36 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
 }
 
+const STANDALONE_QUERY = '(display-mode: standalone)'
+
+const subscribeNever = () => () => {}
+
+function readUserInitial() {
+  const match = document.cookie.match(/userId=(\d+)/)
+  return match ? (USER_INITIALS[match[1]] ?? '?') : '?'
+}
+
+function subscribeStandalone(onChange: () => void) {
+  const mq = window.matchMedia(STANDALONE_QUERY)
+  mq.addEventListener('change', onChange)
+  return () => mq.removeEventListener('change', onChange)
+}
+
+const readStandalone = () => window.matchMedia(STANDALONE_QUERY).matches
+
 interface Props {
   userInitial?: string
 }
 
 export default function AppNav({ userInitial: initialProp }: Props) {
-  const [userInitial, setUserInitial] = useState(initialProp ?? '')
+  const cookieInitial = useSyncExternalStore(subscribeNever, readUserInitial, () => '')
+  const userInitial = initialProp ?? cookieInitial
   const [open, setOpen] = useState(false)
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null)
-  const [isStandalone, setIsStandalone] = useState(false)
+  // Don't show install button if already running as installed app
+  const isStandalone = useSyncExternalStore(subscribeStandalone, readStandalone, () => false)
 
   useEffect(() => {
-    if (!initialProp) {
-      const match = document.cookie.match(/userId=(\d+)/)
-      setUserInitial(match ? (USER_INITIALS[match[1]] ?? '?') : '?')
-    }
-
-    // Don't show install button if already running as installed app
-    setIsStandalone(window.matchMedia('(display-mode: standalone)').matches)
-
     const handlePrompt = (e: Event) => {
       e.preventDefault()
       setInstallPrompt(e as BeforeInstallPromptEvent)
@@ -40,7 +51,7 @@ export default function AppNav({ userInitial: initialProp }: Props) {
       window.removeEventListener('beforeinstallprompt', handlePrompt)
       window.removeEventListener('appinstalled', handleInstalled)
     }
-  }, [initialProp])
+  }, [])
 
   function handleSignOut() {
     document.cookie = 'userId=; path=/; max-age=0'

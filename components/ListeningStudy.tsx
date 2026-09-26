@@ -49,7 +49,8 @@ export default function ListeningStudy({ setId, cards }: Props) {
 
   const current = questions[index]
 
-  // Play the current card's audio
+  // Play a card's audio. Called from the handlers that start, advance or restart
+  // the session (not an effect), so playback also stays inside a user gesture.
   const playAudio = useCallback(async (text: string) => {
     // Stop any playing audio
     if (audioRef.current) {
@@ -74,12 +75,6 @@ export default function ListeningStudy({ setId, cards }: Props) {
     }
   }, [])
 
-  // Auto-play when question changes (after started)
-  useEffect(() => {
-    if (!started || done) return
-    playAudio(current.card.italian)
-  }, [index, started, done, current.card.italian, playAudio])
-
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -100,7 +95,8 @@ export default function ListeningStudy({ setId, cards }: Props) {
       if (index + 1 >= questions.length) {
         setDone(true)
       } else {
-        setIndex(i => i + 1)
+        setIndex(index + 1)
+        playAudio(questions[index + 1].card.italian)
       }
     }, 1800)
   }
@@ -115,7 +111,7 @@ export default function ListeningStudy({ setId, cards }: Props) {
           Italian audio will play automatically. Choose the correct English meaning.
         </p>
         <button
-          onClick={() => setStarted(true)}
+          onClick={() => { setStarted(true); playAudio(questions[0].card.italian) }}
           className="px-8 py-3 bg-qz-blue text-white rounded-full font-semibold hover:bg-qz-blue-dark cursor-pointer transition-colors text-lg"
         >
           Start Listening
@@ -134,7 +130,7 @@ export default function ListeningStudy({ setId, cards }: Props) {
         <p className="text-qz-secondary">{pct}% correct</p>
         <div className="flex gap-3 mt-2">
           <button
-            onClick={() => { setIndex(0); setScore(0); setSelected(null); setDone(false) }}
+            onClick={() => { setIndex(0); setScore(0); setSelected(null); setDone(false); playAudio(questions[0].card.italian) }}
             className="px-6 py-2.5 bg-qz-blue text-white rounded-full font-semibold hover:bg-qz-blue-dark cursor-pointer transition-colors"
           >
             Listen Again

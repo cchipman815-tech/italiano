@@ -136,7 +136,7 @@ async function main() {
     console.log('='.repeat(70))
     console.log('FLAGGED CARDS')
     console.log('='.repeat(70))
-    for (const { italian, stored, translated, phrase } of issues) {
+    for (const { stored, translated, phrase } of issues) {
       console.log(`Italian  : ${phrase}`)
       console.log(`Stored   : ${stored}`)
       console.log(`Translated: ${translated}`)
