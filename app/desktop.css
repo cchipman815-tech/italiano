@@ -4,7 +4,8 @@
    itself. Pages widen to 56rem (Tailwind's max-w-4xl) and, from 1024px, the
    glass tab bar becomes a rail on the left. Study screens stop at 42rem: one
    card at a time reads better card-shaped than stretched across the page.
-   Without the cookie none of this applies and the phone layout is untouched. */
+   Without the cookie none of this applies: the phone layout stays centered
+   at its own 560px (--page-max in shell.css). */
 
 :root[data-layout="desktop"] {
   --page-max: 56rem;
@@ -12,7 +13,6 @@
 }
 
 /* ─── Wider containers ────────────────────────────────────────────────────── */
-[data-layout="desktop"] #shell-content { max-width: var(--page-max); margin-inline: auto; }
 [data-layout="desktop"] .ed-bar { max-width: var(--page-max); }
 [data-layout="desktop"] .st-view,
 [data-layout="desktop"] .fq-fb { max-width: var(--study-max); }

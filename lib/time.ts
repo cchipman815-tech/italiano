@@ -1,7 +1,7 @@
 /**
  * Local-time wording for Oggi. The server runs in UTC, so the browser's
- * time zone travels in a `tz` cookie (set by the shell). SRS dates stay in
- * UTC everywhere, as lib/srs.ts computes them.
+ * time zone travels in a `tz` cookie (set by the shell). The same zone sets
+ * where SRS days turn over: getToday() in lib/api-helpers.ts.
  */
 import type { Bilingual } from './paths'
 

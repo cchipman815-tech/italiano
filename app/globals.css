@@ -49,7 +49,6 @@
    their own overrides (flip, push, sheet, fling become fades; no shake). */
 @media (prefers-reduced-motion: reduce) {
   :root { --d-small:150ms;--d-medium:150ms;--d-large:150ms;--stagger:0ms; }
-  html.playing body::before { animation: none; }
 }
 
 /* Theme switch snaps: setPref('theme') adds this for two frames. */
@@ -106,7 +105,10 @@ body::before {
     radial-gradient(38% 26% at 28% 16%, rgba(var(--ac-rgb), var(--glow-a)), transparent 70%),
     radial-gradient(34% 28% at 82% 74%, rgba(var(--ac-rgb), var(--glow-b)), transparent 70%);
 }
-html.playing body::before { animation: nm-pulse 1200ms var(--e-standard) infinite; }
+/* Only without reduced motion: the build merges reduce blocks upward, so an override couldn't rely on coming later. */
+@media (prefers-reduced-motion: no-preference) {
+  html.playing body::before { animation: nm-pulse 1200ms var(--e-standard) infinite; }
+}
 @keyframes nm-pulse { 50% { opacity: .45; } }
 
 /* Film grain over the page and tab bar, under the undo bar and sheets; never takes a tap. */

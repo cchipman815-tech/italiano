@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
-import { getUserIdFromCookie, unauthorized } from '@/lib/api-helpers'
+import { getToday, getUserIdFromCookie, unauthorized } from '@/lib/api-helpers'
 import { calculateNextReview } from '@/lib/srs'
 import type { SRSState } from '@/lib/srs'
 
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     next_review_at: null,
   }
 
-  const nextState = calculateNextReview(currentState, known)
+  const nextState = calculateNextReview(currentState, known, await getToday())
 
   const { error } = await db.from('progress').upsert(
     {

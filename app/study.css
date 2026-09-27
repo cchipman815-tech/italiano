@@ -196,7 +196,7 @@
 .fq-b small { display: none; color: var(--ink2); font-size: 12.5px; }
 .fq-dlg.tr .fq-b small, .fq-q.tr .fq-tr { display: block; }
 .fq-tr { display: none; color: var(--ink2); font-size: 13px; }
-.fq-tog { min-height: 40px; font-size: 13.5px; color: var(--ink2); }
+.fq-tog { min-height: 44px; font-size: 13.5px; color: var(--ink2); }
 .fq-tog .nm-sw2 { width: 42px; height: 26px; }
 .fq-tog .nm-sw2::after { width: 20px; height: 20px; }
 .fq-tog[aria-checked="true"] .nm-sw2::after { translate: 16px 0; }

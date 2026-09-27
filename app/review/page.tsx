@@ -6,6 +6,7 @@ import NavLink from '@/components/NavLink'
 import Bi from '@/components/Bi'
 import { isValidUserId } from '@/lib/users'
 import { loadReviewDeck, type ReviewDeck } from '@/lib/queries'
+import { getToday } from '@/lib/api-helpers'
 import { getPath, getPathByCategory, type Bilingual } from '@/lib/paths'
 import { t } from '@/lib/i18n'
 import { shuffleArray } from '@/lib/utils'
@@ -31,7 +32,7 @@ export default async function ReviewPage({
 
   const { set, path, cap: capParam } = await searchParams
   const cap = capParam && /^\d{1,2}$/.test(capParam) ? Number(capParam) : undefined
-  const deck = await loadReviewDeck(userId, { set, path, cap })
+  const deck = await loadReviewDeck(userId, { set, path, cap }, await getToday())
   if (!deck) notFound()
 
   const back = backFor(deck.scope)

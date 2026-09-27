@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
-import { getUserIdFromCookie, unauthorized, notFound } from '@/lib/api-helpers'
+import { getToday, getUserIdFromCookie, unauthorized, notFound } from '@/lib/api-helpers'
 import { calculateNextReview, type SRSState } from '@/lib/srs'
 import { isPronoun } from '@/lib/study'
 import type { Conjugations } from '@/lib/types'
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
     .maybeSingle()
 
   const current: SRSState = existing ?? { interval: 1, ease_factor: 2.5, repetitions: 0, next_review_at: null }
-  const next = calculateNextReview(current, known)
+  const next = calculateNextReview(current, known, await getToday())
 
   const { error } = await db.from('conjugation_progress').upsert(
     {

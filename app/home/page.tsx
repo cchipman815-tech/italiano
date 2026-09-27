@@ -6,11 +6,11 @@ import Ring from '@/components/Ring'
 import Bi from '@/components/Bi'
 import { Icon } from '@/components/StudyIcons'
 import { getUserById, isValidUserId } from '@/lib/users'
+import { getToday } from '@/lib/api-helpers'
 import { loadOverview } from '@/lib/queries'
 import { knownShare, type TopicStats } from '@/lib/overview'
 import { MODES, PATHS, getPathByCategory, modesForPath } from '@/lib/paths'
 import { t } from '@/lib/i18n'
-import { todayString } from '@/lib/srs'
 import { TZ_COOKIE, formatDay, greeting, nextReviewLabel, parseTimeZone } from '@/lib/time'
 
 /** Continua: the most recently studied topic, opened in its path's first available mode. */
@@ -42,11 +42,12 @@ export default async function OggiPage() {
   if (!isValidUserId(userId)) redirect('/login')
 
   const user = getUserById(userId)
-  const overview = await loadOverview(userId)
+  const today = await getToday()
+  const overview = await loadOverview(userId, today)
   const zone = parseTimeZone(cookieStore.get(TZ_COOKIE)?.value)
   const now = new Date()
   const hello = greeting(now, zone)
-  const next = overview.nextReviewAt ? nextReviewLabel(overview.nextReviewAt, todayString()) : null
+  const next = overview.nextReviewAt ? nextReviewLabel(overview.nextReviewAt, today) : null
 
   return (
     <>

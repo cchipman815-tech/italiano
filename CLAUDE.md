@@ -237,7 +237,7 @@ Generated practice sentences: `card_id`, `set_id`, `italian`, `english`, `type` 
 | `saved.ts` | Salvate: search, day grouping, saved → card |
 | `time.ts` | Local-time wording via the `tz` cookie |
 | `quiz.ts` | `selectDistractors()` |
-| `users.ts`, `api-helpers.ts`, `supabase.ts`, `utils.ts` | Users; `getUserIdFromCookie()`/`unauthorized()`/`notFound()`; server client; `shuffleArray()` |
+| `users.ts`, `api-helpers.ts`, `supabase.ts`, `utils.ts` | Users; `getUserIdFromCookie()`/`getToday()`/`unauthorized()`/`notFound()`; server client; `shuffleArray()` |
 
 ### `proxy.ts`
 Middleware: unauthenticated → `/login`; signed in on `/login` → `/home`; API routes pass through; `isMissingRoute` URLs (a path slug that isn't one of the four, a topic id that isn't a uuid) are rewritten to a real 404.
@@ -292,7 +292,7 @@ Also: `--wash`, `--wash2`, `--glass`, `--glass-sheet`, `--top-glass`, `--dim`, `
 Every interface string is an Italian/English pair (`lib/i18n.ts`), rendered by `<Bi>`. The `imm` cookie (`en` / `mix` / `it`, default **mix**) is stamped as `data-imm`, and CSS shows the right half: Mix shows Italian with a smaller English beside it (`.nm-st` stacks it below; `.nm-x` / `itOnlyInMix` hides the English in Mix). Every Italian string carries `lang="it"`; `<html lang="en">`.
 
 ### Versione desktop
-Only from the profile sheet (`layout` cookie → `data-layout="desktop"`); nothing switches automatically. Pages widen to 56rem (`max-w-4xl`), study screens to 42rem, and from 1024px the tab bar becomes a left rail with the page centered beside it. Without the cookie the phone layout is untouched.
+Only from the profile sheet (`layout` cookie → `data-layout="desktop"`); nothing switches automatically. Pages widen to 56rem (`max-w-4xl`), study screens to 42rem, and from 1024px the tab bar becomes a left rail with the page centered beside it. Without the cookie the phone layout stays as it is, centered at 560px (`--page-max` in `app/shell.css`) on a wide window.
 
 ### Conventions
 - Every `<button>` has `type="button"` unless it submits.
@@ -307,6 +307,7 @@ Only from the profile sheet (`layout` cookie → `data-layout="desktop"`); nothi
 - **Server components** load data through `lib/queries.ts` (service role, no HTTP to our own API) and pass it to client components. Decks are shuffled on the server so hydration matches.
 - **Client components** call the API routes for writes. Progress saves are fire-and-forget but tracked (`lib/progress-client.ts`).
 - **Due vs new:** a card never reviewed (`next_review_at` null) is new, not due. Oggi's due number = due cards + due conjugation forms, and Ripasso shows exactly those.
+- **Days are the learner's:** "today" comes from `getToday()` (`lib/api-helpers.ts`), in the zone from the `tz` cookie the shell sets (UTC until it has), so due counts turn over at their midnight. Loaders and `calculateNextReview()` take that date; never compute today in UTC on the server.
 - **SRS:** simplified SM-2 in `lib/srs.ts`. Correct → `interval *= easeFactor`, `easeFactor += 0.1`. Incorrect → `interval = 1`, `easeFactor = max(1.3, easeFactor − 0.2)`, `repetitions = 0`.
 - **Enabled filtering:** disabled cards and forms in `conjugations.off` stay out of every study mode.
 - **Undo:** DELETE routes return a snapshot; `/api/cards/restore` and `/api/sets/restore` replay it.

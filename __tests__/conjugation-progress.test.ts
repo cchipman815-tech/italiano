@@ -6,6 +6,7 @@ type Row = Record<string, unknown>
 const fake = vi.hoisted(() => {
   const state = {
     userId: 1 as number | null,
+    today: '2026-09-26',
     tables: {} as Record<string, Row[]>,
     upserts: [] as { table: string; row: Row; onConflict?: string }[],
   }
@@ -30,6 +31,7 @@ vi.mock('@/lib/supabase', () => ({ createServerClient: () => fake.client }))
 vi.mock('@/lib/api-helpers', async importOriginal => ({
   ...(await importOriginal<typeof import('@/lib/api-helpers')>()),
   getUserIdFromCookie: async () => fake.state.userId,
+  getToday: async () => fake.state.today,
 }))
 
 const { POST } = await import('@/app/api/conjugation-progress/route')
@@ -43,6 +45,7 @@ beforeEach(() => {
   vi.useFakeTimers()
   vi.setSystemTime(new Date('2026-09-26T12:00:00Z'))
   fake.state.userId = 1
+  fake.state.today = '2026-09-26'
   fake.state.upserts = []
   fake.state.tables = {
     cards: [
@@ -76,6 +79,13 @@ describe('POST /api/conjugation-progress', () => {
   it('resets a missed form to tomorrow and lowers its ease', async () => {
     await call({ cardId: 'parlare', pronoun: 'noi', known: false })
     expect(fake.state.upserts[0].row).toMatchObject({ known: false, interval: 1, repetitions: 0, ease_factor: 2.3, next_review_at: '2026-09-27' })
+  })
+
+  it('counts from the learner’s today, not the server’s', async () => {
+    // Evening in Los Angeles: still the 25th there, while UTC (the system clock here) is the 26th.
+    fake.state.today = '2026-09-25'
+    await call({ cardId: 'parlare', pronoun: 'io', known: false })
+    expect(fake.state.upserts[0].row).toMatchObject({ next_review_at: '2026-09-26' })
   })
 
   it('needs a signed-in user', async () => {

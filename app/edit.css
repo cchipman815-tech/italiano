@@ -78,7 +78,8 @@
 .ed-adj { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 14px; font-size: 14.5px; }
 .ed-adj span { display: flex; align-items: baseline; gap: 8px; }
 .ed-adj b { font-weight: 400; font-family: var(--font-serif); }
-.ed-gen { justify-self: start; min-height: 36px; padding: 0 12px; border-radius: 99px; border: 0; background: rgba(var(--ac-rgb), .12); color: var(--ac-t); font-size: 13px; font-weight: 500; transition: scale var(--d-micro) var(--e-standard), opacity var(--d-small) var(--e-standard); }
+.ed-gen { position: relative; justify-self: start; min-height: 36px; padding: 0 12px; border-radius: 99px; border: 0; background: rgba(var(--ac-rgb), .12); color: var(--ac-t); font-size: 13px; font-weight: 500; transition: scale var(--d-micro) var(--e-standard), opacity var(--d-small) var(--e-standard); }
+.ed-gen::after { content: ""; position: absolute; inset: -4px 0; } /* a 44px target around the 36px pill */
 .ed-gen:active { scale: .96; }
 .ed-gen:disabled { opacity: .7; }
 .ed-fields { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -89,7 +90,7 @@
 .ed-form em { width: 48px; }
 .ed-form span { flex: 1; font-family: var(--font-serif); font-size: 15.5px; }
 .ed-acts { display: flex; flex-wrap: wrap; gap: 6px; }
-.ed-a { min-height: 40px; padding: 0 12px; border-radius: 12px; border: 0; background: var(--wash); box-shadow: inset 0 0 0 1px var(--hl); color: var(--ink); font-size: 13.5px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; transition: scale var(--d-micro) var(--e-standard); }
+.ed-a { min-height: 44px; padding: 0 12px; border-radius: 12px; border: 0; background: var(--wash); box-shadow: inset 0 0 0 1px var(--hl); color: var(--ink); font-size: 13.5px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; transition: scale var(--d-micro) var(--e-standard); }
 .ed-a:active { scale: .96; }
 .ed-a:disabled { opacity: .7; }
 .ed-a.del { color: var(--no); margin-left: auto; }

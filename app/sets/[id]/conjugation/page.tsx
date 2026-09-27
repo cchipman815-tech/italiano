@@ -2,6 +2,7 @@ import ConjugationStudy from '@/components/ConjugationStudy'
 import StudyGate from '@/components/StudyGate'
 import { openStudySet } from '@/lib/study-page'
 import { loadCardsWithDueForms } from '@/lib/queries'
+import { getToday } from '@/lib/api-helpers'
 import { buildConjugationDeck, parseDirection } from '@/lib/study'
 
 export default async function ConjugationPage({
@@ -14,7 +15,7 @@ export default async function ConjugationPage({
   const { userId, set, availability } = await openStudySet(params, 'conjugations')
   if (!availability.available) return <StudyGate setId={set.id} back={set.back} icon="verb" reason={availability.reason} />
   const direction = parseDirection((await searchParams).direction)
-  const due = await loadCardsWithDueForms(userId, set.cards.map(c => c.id))
+  const due = await loadCardsWithDueForms(userId, set.cards.map(c => c.id), await getToday())
 
   return (
     <ConjugationStudy

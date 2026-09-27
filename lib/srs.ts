@@ -11,24 +11,32 @@ export interface SRSState {
   next_review_at: string | null  // ISO date string YYYY-MM-DD
 }
 
-function toDateString(date: Date): string {
-  return date.toISOString().split('T')[0]
+/**
+ * Today's date (YYYY-MM-DD) in a time zone. The day turns over at the
+ * learner's midnight, not UTC's: the server gets it with getToday() in
+ * lib/api-helpers.ts, from the `tz` cookie. UTC is only the fallback.
+ */
+export function todayString(timeZone = 'UTC', now: Date = new Date()): string {
+  // en-CA formats as YYYY-MM-DD.
+  return new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(now)
 }
 
-function addDays(days: number): string {
-  const d = new Date()
-  d.setDate(d.getDate() + Math.round(days))
-  return toDateString(d)
+/** A YYYY-MM-DD date plus whole days, as a date. */
+function addDays(date: string, days: number): string {
+  const d = new Date(`${date}T00:00:00Z`)
+  d.setUTCDate(d.getUTCDate() + Math.round(days))
+  return d.toISOString().slice(0, 10)
 }
 
-export function calculateNextReview(state: SRSState, correct: boolean): SRSState {
+/** `today` is the learner's date (todayString with their zone); the next review counts from it. */
+export function calculateNextReview(state: SRSState, correct: boolean, today: string = todayString()): SRSState {
   if (!correct) {
     // Incorrect: reset streak, schedule for tomorrow, reduce ease
     return {
       interval: 1,
       ease_factor: Math.max(1.3, state.ease_factor - 0.2),
       repetitions: 0,
-      next_review_at: addDays(1),
+      next_review_at: addDays(today, 1),
     }
   }
 
@@ -50,17 +58,12 @@ export function calculateNextReview(state: SRSState, correct: boolean): SRSState
     interval: newInterval,
     ease_factor: newEaseFactor,
     repetitions: newRepetitions,
-    next_review_at: addDays(newInterval),
+    next_review_at: addDays(today, newInterval),
   }
 }
 
-export function todayString(): string {
-  return toDateString(new Date())
-}
-
-export function isDueToday(next_review_at: string | null): boolean {
+export function isDueToday(next_review_at: string | null, today: string = todayString()): boolean {
   if (!next_review_at) return true  // never reviewed → always due
-  const today = todayString()
   return next_review_at <= today
 }
 

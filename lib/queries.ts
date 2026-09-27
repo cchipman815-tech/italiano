@@ -6,7 +6,6 @@ import 'server-only'
 import { createServerClient } from './supabase'
 import { buildOverview, type Overview, type RawCard, type RawFormProgress, type RawProgress, type RawSet } from './overview'
 import { getPath, getPathByCategory } from './paths'
-import { todayString } from './srs'
 import type { Card, Pronoun, SavedTranslation } from './types'
 import { reviewItems, type CardPlace, type ReviewItem } from './study'
 import type { TopicChoice } from './saved'
@@ -23,7 +22,8 @@ async function loadFormProgress(userId: number): Promise<RawFormProgress[]> {
   return error ? [] : (data as RawFormProgress[])
 }
 
-export async function loadOverview(userId: number): Promise<Overview> {
+/** `today` is the learner's date (lib/srs.ts todayString with their zone), so counts turn over at their midnight. */
+export async function loadOverview(userId: number, today: string): Promise<Overview> {
   const db = createServerClient()
   const [sets, cards, progress, forms] = await Promise.all([
     db.from('sets').select('id, title, description, category, sort_order'),
@@ -38,7 +38,7 @@ export async function loadOverview(userId: number): Promise<Overview> {
     cards.data as RawCard[],
     progress.data as RawProgress[],
     forms,
-    todayString(),
+    today,
   )
 }
 
@@ -62,9 +62,8 @@ export interface ReviewDeck {
  * plus conjugation forms due today whose verb is enabled, within a scope.
  * These are exactly what Oggi's due number counts.
  */
-export async function loadReviewDeck(userId: number, scope: ReviewScope): Promise<ReviewDeck | null> {
+export async function loadReviewDeck(userId: number, scope: ReviewScope, today: string): Promise<ReviewDeck | null> {
   const db = createServerClient()
-  const today = todayString()
 
   let setIds: string[] | null = null
   let deckScope: ReviewDeck['scope'] = { kind: 'all' }
@@ -163,10 +162,10 @@ export async function loadStudySet(setId: string): Promise<StudySet | null> {
 }
 
 /** Verb cards among `cardIds` with at least one form due today or earlier. */
-export async function loadCardsWithDueForms(userId: number, cardIds: string[]): Promise<Set<string>> {
+export async function loadCardsWithDueForms(userId: number, cardIds: string[], today: string): Promise<Set<string>> {
   if (cardIds.length === 0) return new Set()
   const ids = new Set(cardIds)
-  return new Set((await loadDueForms(userId, todayString())).map(f => f.card_id).filter(id => ids.has(id)))
+  return new Set((await loadDueForms(userId, today)).map(f => f.card_id).filter(id => ids.has(id)))
 }
 
 /** Where a set lives in the Notte structure: its path, if its category is one. */

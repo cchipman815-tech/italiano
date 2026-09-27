@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Feature worktrees are full checkouts, with their own builds.
+    ".worktrees/**",
   ]),
 ]);
 

@@ -9,6 +9,7 @@ import Bi from '@/components/Bi'
 import { Icon } from '@/components/StudyIcons'
 import { isValidUserId } from '@/lib/users'
 import { loadOverview } from '@/lib/queries'
+import { getToday } from '@/lib/api-helpers'
 import { getPath } from '@/lib/paths'
 import { t } from '@/lib/i18n'
 
@@ -27,7 +28,7 @@ export default async function PathPage({
   const path = getPath(slug)
   if (!path) notFound()
 
-  const overview = await loadOverview(userId)
+  const overview = await loadOverview(userId, await getToday())
   const stats = overview.paths.find(p => p.slug === path.slug)!
   const topics = stats.topics.map(topicStats => ({
     id: topicStats.id,

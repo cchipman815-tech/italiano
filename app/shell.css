@@ -8,10 +8,13 @@
   /* The tab bar floats 22px up, or just above the home indicator. */
   --tabs-bottom: max(22px, calc(env(safe-area-inset-bottom, 0px) + 6px));
   --vt-dim: .68;
+  /* Pages stop where sheets and study screens do, so a wide window shows the
+     phone layout centered rather than stretched. Versione desktop widens it. */
+  --page-max: 560px;
 }
 :root[data-mode="giorno"] { --vt-dim: .86; }
 
-#shell-content { min-height: 100dvh; }
+#shell-content { min-height: 100dvh; max-width: var(--page-max); margin-inline: auto; }
 #shell-content.shell-has-tabs { padding-bottom: calc(var(--tabs-bottom) + 76px); }
 html.sheet-open { overflow: hidden; }
 
@@ -130,7 +133,7 @@ html.sheet-open { overflow: hidden; }
 .nm-scrl::-webkit-scrollbar { display: none; }
 
 .nm-seg { display: flex; padding: 4px; border-radius: 14px; background: var(--wash); box-shadow: inset 0 0 0 1px var(--hl); }
-.nm-seg button { flex: 1; min-height: 40px; border: 0; border-radius: 10px; background: none; color: var(--ink2); font-size: 13px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.nm-seg button { flex: 1; min-height: 44px; border: 0; border-radius: 10px; background: none; color: var(--ink2); font-size: 13px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 6px; }
 .nm-seg button[aria-pressed="true"] { background: var(--wash2); color: var(--ink); box-shadow: var(--wash-sh); }
 
 /* Profile sheet */
@@ -138,7 +141,7 @@ html.sheet-open { overflow: hidden; }
 .nm-me .nm-av span { width: 44px; height: 44px; font-size: 16px; }
 .nm-me b { font-size: 17px; font-weight: 600; display: block; }
 .nm-me small { color: var(--ink2); font-size: 12.5px; }
-.nm-me-sw { margin-left: auto; min-height: 40px; padding: 0 12px; border: 0; border-radius: 12px; background: var(--wash); box-shadow: inset 0 0 0 1px var(--hl); color: var(--ink); font-size: 13px; font-weight: 500; }
+.nm-me-sw { margin-left: auto; min-height: 44px; padding: 0 12px; border: 0; border-radius: 12px; background: var(--wash); box-shadow: inset 0 0 0 1px var(--hl); color: var(--ink); font-size: 13px; font-weight: 500; }
 .nm-pref { border-radius: 18px; background: var(--wash); box-shadow: inset 0 0 0 1px var(--hl); padding: 12px 14px; display: grid; gap: 9px; }
 .nm-pref > span { font-size: 13px; font-weight: 500; color: var(--ink2); }
 .nm-tog { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; width: 100%; border: 0; background: none; padding: 0; color: var(--ink); font-size: 15px; font-weight: 500; text-align: start; }
@@ -186,7 +189,8 @@ html:not([data-nav])::view-transition-new(root), html:not([data-nav])::view-tran
   html[data-nav]::view-transition-new(root) { animation: vt-fade-in var(--d-micro) var(--e-standard) both; }
   .nm-tabs.away { translate: 0 0; opacity: 0; transition: opacity var(--d-small) var(--e-standard); }
   .p-sheet { translate: 0 0; opacity: 0; pointer-events: none; transition: opacity var(--d-small) var(--e-standard); }
-  .p-sheet.open { opacity: 1; pointer-events: auto; }
+  /* Restates the transition: .p-sheet.open above would otherwise keep its translate one and skip the fade. */
+  .p-sheet.open { opacity: 1; pointer-events: auto; transition: opacity var(--d-small) var(--e-standard); }
   .p-sheet .sr { translate: 0 0; transition-delay: 0s !important; }
   .p-toast, .p-toast.on { translate: 0 0; }
 }
