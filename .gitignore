@@ -50,3 +50,6 @@ next-env.d.ts
 
 # data backups (scripts/regroup-cards.ts)
 /backups/
+
+# The Prego textbook (97 MB): local reference only
+docs/prego-an-invitation-to-italian.pdf
