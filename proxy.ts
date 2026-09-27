@@ -28,6 +28,7 @@ export function proxy(request: NextRequest) {
   return NextResponse.next()
 }
 
+// Icons and the manifest stay public: Android fetches them without the userId cookie.
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|sw.js|icon-192.png|icon-512.png).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|sw.js|icon.svg|apple-icon.png|icon-).*)'],
 }
