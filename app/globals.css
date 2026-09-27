@@ -3,6 +3,7 @@
 @import "./screens.css";
 @import "./study.css";
 @import "./edit.css";
+@import "./desktop.css";
 
 /* ═══ Notte design tokens ═══════════════════════════════════════════════════
    Ported from docs/design/notte-prototype.html (the `.nm{…}` and
@@ -79,18 +80,6 @@
   --ease-decel:    var(--e-decel);
   --ease-accel:    var(--e-accel);
   --ease-sharp:    var(--e-sharp);
-
-  /* Transitional: the Quizlet tokens, aliased below. Removed in Phase 6. */
-  --color-qz-blue:       var(--qz-blue);
-  --color-qz-blue-dark:  var(--qz-blue-dark);
-  --color-qz-blue-light: var(--qz-blue-light);
-  --color-qz-bg:         var(--qz-bg);
-  --color-qz-text:       var(--qz-text);
-  --color-qz-secondary:  var(--qz-secondary);
-  --color-qz-muted:      var(--qz-muted);
-  --color-qz-border:     var(--qz-border);
-  --color-qz-subtle:     var(--qz-subtle);
-  --color-qz-white:      var(--qz-white);
 }
 
 /* ─── Base ─────────────────────────────────────────────────────────────────── */
@@ -171,41 +160,3 @@ body::after {
 @utility pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
 @utility pl-safe { padding-left: env(safe-area-inset-left, 0px); }
 @utility pr-safe { padding-right: env(safe-area-inset-right, 0px); }
-
-/* ═══ Transitional: Quizlet aliases (removed in Phase 6) ═════════════════════
-   Unmigrated pages keep their qz-* classes but draw from the Notte tokens.
-   bg-white / text-white are remapped too, or white cards would carry
-   light ink in Notte. These are unlayered, so they beat Tailwind's layer. */
-:root {
-  --qz-blue:        var(--ac);
-  --qz-blue-dark:   var(--ac-line);
-  --qz-blue-light:  rgba(var(--ac-rgb), .16);
-  --qz-bg:          var(--bg);
-  --qz-text:        var(--ink);
-  --qz-secondary:   var(--ink2);
-  --qz-muted:       color-mix(in srgb, var(--ink2) 70%, var(--bg));
-  --qz-border:      var(--hl);
-  --qz-subtle:      var(--surf2);
-  --qz-white:       var(--surf);
-  --qz-shadow-card: inset 0 1px 0 var(--inset-hi);
-  --qz-shadow-sm:   inset 0 1px 0 var(--inset-hi);
-}
-.bg-white { background-color: var(--surf); }
-.text-white { color: var(--on-ac); }
-/* Ambra as text or a line needs the darker Giorno values (--ac is 1.94:1 on paper). */
-.text-qz-blue { color: var(--ac-t); }
-.border-qz-blue { border-color: var(--ac-line); }
-.bg-qz-blue { box-shadow: inset 0 0 0 1px var(--ac-edge); }
-
-.qz-card {
-  background: var(--qz-white);
-  border-radius: 16px;
-  border: 2px solid var(--qz-border);
-  box-shadow: var(--qz-shadow-card);
-}
-
-.qz-card-sm {
-  background: var(--qz-bg);
-  border-radius: 8px;
-  box-shadow: var(--qz-shadow-sm);
-}

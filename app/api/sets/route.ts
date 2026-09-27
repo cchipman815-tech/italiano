@@ -1,30 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
 import { getUserIdFromCookie, unauthorized } from '@/lib/api-helpers'
-import { loadOverview } from '@/lib/queries'
 import { parseNewTopic } from '@/lib/cards'
-
-/** Every set with the current user's numbers. due_cards excludes cards never reviewed; those are new_cards. */
-export async function GET() {
-  const userId = await getUserIdFromCookie()
-  if (!userId) return unauthorized()
-
-  try {
-    const { topics } = await loadOverview(userId)
-    return NextResponse.json(topics.map(topic => ({
-      id: topic.id,
-      title: topic.title,
-      description: topic.description,
-      category: topic.category,
-      total_cards: topic.total,
-      known_cards: topic.known,
-      due_cards: topic.due,
-      new_cards: topic.new,
-    })))
-  } catch (err) {
-    return NextResponse.json({ error: err instanceof Error ? err.message : 'Failed to load sets' }, { status: 500 })
-  }
-}
 
 /** Nuovo argomento: { title, category } → a topic at the end of its path. */
 export async function POST(request: Request) {

@@ -7,7 +7,3 @@ export function shuffleArray<T>(arr: T[]): T[] {
   return copy
 }
 
-export function calculateProgress(knownCards: number, totalCards: number): number {
-  if (totalCards === 0) return 0
-  return Math.round((knownCards / totalCards) * 100)
-}

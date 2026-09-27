@@ -1,0 +1,68 @@
+/* ═══ Versione desktop ═══════════════════════════════════════════════════════
+   Only with the layout=desktop cookie (the switch in the profile sheet), which
+   the server stamps as <html data-layout="desktop">; nothing switches on by
+   itself. Pages widen to 56rem (Tailwind's max-w-4xl) and, from 1024px, the
+   glass tab bar becomes a rail on the left. Study screens stop at 42rem: one
+   card at a time reads better card-shaped than stretched across the page.
+   Without the cookie none of this applies and the phone layout is untouched. */
+
+:root[data-layout="desktop"] {
+  --page-max: 56rem;
+  --study-max: 42rem;
+}
+
+/* ─── Wider containers ────────────────────────────────────────────────────── */
+[data-layout="desktop"] #shell-content { max-width: var(--page-max); margin-inline: auto; }
+[data-layout="desktop"] .ed-bar { max-width: var(--page-max); }
+[data-layout="desktop"] .st-view,
+[data-layout="desktop"] .fq-fb { max-width: var(--study-max); }
+
+@media (min-width: 768px) {
+  /* Room for the four paths side by side. */
+  [data-layout="desktop"] .nm-paths { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* ─── From 1024px: the tab bar becomes a left rail ────────────────────────── */
+@media (min-width: 1024px) {
+  :root[data-layout="desktop"] {
+    --rail: 104px;
+    --rail-h: 264px; /* 4 tabs × 63px + 12px padding */
+  }
+
+  /* The page sits right of the rail, centered in what's left. */
+  [data-layout="desktop"] #shell-content.shell-has-tabs {
+    max-width: calc(var(--page-max) + var(--rail));
+    padding-left: var(--rail);
+    padding-bottom: 40px;
+  }
+
+  [data-layout="desktop"] .nm-tabs {
+    left: 14px; right: auto; bottom: auto; top: calc(50% - var(--rail-h) / 2);
+    width: 76px; height: var(--rail-h); max-width: none; margin: 0;
+    padding: 6px; border-radius: 30px;
+    grid-template-columns: 1fr; grid-auto-rows: 1fr;
+  }
+  [data-layout="desktop"] .nm-tabs.away { translate: -150% 0; }
+  [data-layout="desktop"] .nm-tabs .pill {
+    left: 6px; right: 6px; top: 6px; bottom: auto;
+    width: auto; height: calc((100% - 12px) / 4);
+    translate: 0 calc(var(--i, 0) * 100%);
+  }
+  [data-layout="desktop"] .nm-tab { gap: 4px; font-size: 11px; }
+  @media (hover: hover) {
+    [data-layout="desktop"] .nm-tab:not(.on):hover { color: var(--ink); }
+  }
+
+  /* Bottom bars that belong to the page follow it: centered right of the
+     rail, and down at the bottom now that no tab bar sits there. */
+  [data-layout="desktop"] .shell-has-tabs .nm-float,
+  [data-layout="desktop"] .shell-has-tabs .nm-float.low,
+  [data-layout="desktop"] .p-toast.raised {
+    left: calc(var(--rail) + 14px);
+    bottom: max(28px, calc(env(safe-area-inset-bottom, 0px) + 12px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) and (min-width: 1024px) {
+  [data-layout="desktop"] .nm-tabs.away { translate: 0 0; }
+}

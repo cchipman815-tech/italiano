@@ -83,18 +83,6 @@ export interface ConjugationProgress {
   next_review_at: string | null
 }
 
-export interface SetWithProgress extends Set {
-  total_cards: number
-  known_cards: number
-  due_cards?: number
-  new_cards?: number
-}
-
-export interface SetWithCards extends Set {
-  cards: Card[]
-  progress: Progress[]
-}
-
 export interface SavedTranslation {
   id: string
   user_id: number

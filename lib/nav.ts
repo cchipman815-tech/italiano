@@ -4,6 +4,7 @@
  */
 import type { IconName } from '@/components/StudyIcons'
 import type { StringKey } from './i18n'
+import { isPathSlug } from './paths'
 
 export type TabKey = 'oggi' | 'impara' | 'traduci' | 'salvate'
 
@@ -39,4 +40,22 @@ export function tabForPath(pathname: string): TabKey | null {
 /** The tab bar shows on tab roots and the pages directly under Impara. */
 export function showsTabBar(pathname: string): boolean {
   return tabForPath(pathname) !== null
+}
+
+const PATH_PAGE = /^\/learn\/([^/]+)/
+const TOPIC_PAGE = /^\/sets\/([^/]+)/
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+/**
+ * Routes that can't exist, known without the database: a path that isn't one
+ * of the four, or a topic id that isn't a uuid. proxy.ts answers these with a
+ * real 404; the loading screens would otherwise start a 200 response before
+ * the page calls notFound().
+ */
+export function isMissingRoute(pathname: string): boolean {
+  const path = PATH_PAGE.exec(pathname)?.[1]
+  if (path !== undefined) return !isPathSlug(decodeURIComponent(path))
+  const topic = TOPIC_PAGE.exec(pathname)?.[1]
+  if (topic !== undefined) return !UUID.test(topic)
+  return false
 }

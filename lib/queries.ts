@@ -54,7 +54,7 @@ export interface ReviewDeck {
   /** Path and topic of every set an item comes from, for the card's tag. */
   places: Record<string, CardPlace>
   /** What the deck covers, for the back button: a topic title, a path, or everything. */
-  scope: { kind: 'set'; id: string; title: string } | { kind: 'path'; slug: string } | { kind: 'all' }
+  scope: { kind: 'set'; id: string; title: string; category: string } | { kind: 'path'; slug: string } | { kind: 'all' }
 }
 
 /**
@@ -69,10 +69,10 @@ export async function loadReviewDeck(userId: number, scope: ReviewScope): Promis
   let setIds: string[] | null = null
   let deckScope: ReviewDeck['scope'] = { kind: 'all' }
   if (scope.set) {
-    const { data: set } = await db.from('sets').select('id, title').eq('id', scope.set).maybeSingle()
+    const { data: set } = await db.from('sets').select('id, title, category').eq('id', scope.set).maybeSingle()
     if (!set) return null
     setIds = [set.id]
-    deckScope = { kind: 'set', id: set.id, title: set.title }
+    deckScope = { kind: 'set', id: set.id, title: set.title, category: set.category }
   } else if (scope.path) {
     const path = getPath(scope.path)
     if (!path) return null

@@ -2,21 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
 import { getUserIdFromCookie, unauthorized } from '@/lib/api-helpers'
 
-export async function GET() {
-  const userId = await getUserIdFromCookie()
-  if (!userId) return unauthorized()
-
-  const db = createServerClient()
-  const { data, error } = await db
-    .from('saved_translations')
-    .select('*')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false })
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json(data ?? [])
-}
-
 /**
  * When Salvate undoes a delete it sends the row's original date, so the row
  * returns to its place. Anything missing, invalid or in the future means now.

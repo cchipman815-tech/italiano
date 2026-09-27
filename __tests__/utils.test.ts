@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { shuffleArray, calculateProgress } from '@/lib/utils'
+import { shuffleArray } from '@/lib/utils'
 
 describe('shuffleArray', () => {
   it('returns an array with the same elements', () => {
@@ -17,20 +17,3 @@ describe('shuffleArray', () => {
   })
 })
 
-describe('calculateProgress', () => {
-  it('returns 0 when no cards are known', () => {
-    expect(calculateProgress(0, 10)).toBe(0)
-  })
-
-  it('returns 100 when all cards are known', () => {
-    expect(calculateProgress(10, 10)).toBe(100)
-  })
-
-  it('returns 0 when totalCards is 0', () => {
-    expect(calculateProgress(0, 0)).toBe(0)
-  })
-
-  it('rounds to nearest integer', () => {
-    expect(calculateProgress(1, 3)).toBe(33)
-  })
-})

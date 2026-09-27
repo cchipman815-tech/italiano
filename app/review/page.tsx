@@ -6,12 +6,15 @@ import NavLink from '@/components/NavLink'
 import Bi from '@/components/Bi'
 import { isValidUserId } from '@/lib/users'
 import { loadReviewDeck, type ReviewDeck } from '@/lib/queries'
-import { getPath, type Bilingual } from '@/lib/paths'
+import { getPath, getPathByCategory, type Bilingual } from '@/lib/paths'
 import { t } from '@/lib/i18n'
 import { shuffleArray } from '@/lib/utils'
 
 function backFor(scope: ReviewDeck['scope']): { href: string; label: Bilingual | string } {
-  if (scope.kind === 'set') return { href: `/sets/${scope.id}`, label: scope.title }
+  if (scope.kind === 'set') {
+    const path = getPathByCategory(scope.category)
+    return { href: path ? `/learn/${path.slug}?topic=${scope.id}` : '/learn', label: scope.title }
+  }
   if (scope.kind === 'path') return { href: `/learn/${scope.slug}`, label: getPath(scope.slug)!.name }
   return { href: '/home', label: t('today') }
 }

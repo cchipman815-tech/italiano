@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { isValidUserId } from '@/lib/users'
+import { isMissingRoute } from '@/lib/nav'
 
 export function proxy(request: NextRequest) {
   const raw = request.cookies.get('userId')?.value
@@ -17,6 +18,11 @@ export function proxy(request: NextRequest) {
 
   if (hasValidUser && isLoginPage) {
     return NextResponse.redirect(new URL('/home', request.url))
+  }
+
+  // No route matches this URL, so Next renders app/not-found.tsx with a 404 status.
+  if (isMissingRoute(request.nextUrl.pathname)) {
+    return NextResponse.rewrite(new URL('/_missing', request.url))
   }
 
   return NextResponse.next()

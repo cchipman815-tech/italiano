@@ -1,4 +1,5 @@
 'use client'
+import type { CSSProperties } from 'react'
 import { TABS, type TabKey } from '@/lib/nav'
 import { plainText, t } from '@/lib/i18n'
 import { Icon } from './StudyIcons'
@@ -7,8 +8,9 @@ import NavLink from './NavLink'
 import { useShell } from './Shell'
 
 /**
- * Glass tab bar: 4 tabs and a pill that slides to the active one. Slides away
- * on screens without tabs (study, edit, login) and is inert while hidden.
+ * Glass tab bar: 4 tabs and a pill that slides to the active one (--i is its
+ * index). Slides away on screens without tabs (study, edit, login) and is
+ * inert while hidden. In Versione desktop from 1024px it's a left rail (app/desktop.css).
  */
 export default function TabBar({ active, visible }: { active: TabKey | null; visible: boolean }) {
   const imm = useShell()?.prefs.imm ?? 'mix'
@@ -20,7 +22,7 @@ export default function TabBar({ active, visible }: { active: TabKey | null; vis
       aria-label={plainText(t('tabs'), imm)}
       inert={!visible}
     >
-      <span className="pill" aria-hidden="true" style={{ translate: `${index * 100}% 0` }} />
+      <span className="pill" aria-hidden="true" style={{ '--i': index } as CSSProperties} />
       {TABS.map(tab => {
         const on = tab.key === active
         return (

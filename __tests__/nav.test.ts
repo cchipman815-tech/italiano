@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { TABS, showsTabBar, tabForPath } from '@/lib/nav'
+import { TABS, isMissingRoute, showsTabBar, tabForPath } from '@/lib/nav'
 
 describe('TABS', () => {
   it('lists Oggi, Impara, Traduci, Salvate in order', () => {
@@ -36,5 +36,17 @@ describe('showsTabBar', () => {
     expect(showsTabBar('/sets/abc/flashcard')).toBe(false)
     expect(showsTabBar('/sets/abc/edit')).toBe(false)
     expect(showsTabBar('/login')).toBe(false)
+  })
+})
+
+describe('isMissingRoute', () => {
+  const id = '43294d4a-6aa0-4f67-8c05-e65aac548910'
+
+  it.each(['/learn/nope', '/learn/nope/x', '/sets/abc', '/sets/abc/quiz', '/sets/123/edit'])('%s cannot exist', path => {
+    expect(isMissingRoute(path)).toBe(true)
+  })
+
+  it.each(['/home', '/learn', '/learn/verbi', '/learn/parole', `/sets/${id}`, `/sets/${id}/flashcard`, '/nope'])('%s is left to the app', path => {
+    expect(isMissingRoute(path)).toBe(false)
   })
 })
